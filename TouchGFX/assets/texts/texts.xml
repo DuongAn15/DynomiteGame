@@ -24,24 +24,6 @@
       <Text Id="__SingleUse_AZI5" Alignment="Center" TypographyId="Typography_00">
         <Translation Language="GB">&lt;value&gt;</Translation>
       </Text>
-      <Text Id="__SingleUse_XYO6" Alignment="Center" TypographyId="Typography_01">
-        <Translation Language="GB">New record!</Translation>
-      </Text>
-      <Text Id="__SingleUse_MHSD" Alignment="Left" TypographyId="Typography_01">
-        <Translation Language="GB">0000</Translation>
-      </Text>
-      <Text Id="__SingleUse_MR4G" Alignment="Center" TypographyId="Typography_01">
-        <Translation Language="GB">BEST: &lt;value&gt;</Translation>
-      </Text>
-      <Text Id="__SingleUse_Y8MO" Alignment="Left" TypographyId="Typography_01">
-        <Translation Language="GB">0000</Translation>
-      </Text>
-      <Text Id="__SingleUse_ZTWO" Alignment="Center" TypographyId="Typography_01">
-        <Translation Language="GB">SCORE: &lt;value&gt;</Translation>
-      </Text>
-      <Text Id="__SingleUse_BHV4" Alignment="Center" TypographyId="Typography_01">
-        <Translation Language="GB">GAME OVER</Translation>
-      </Text>
     </TextGroup>
   </Texts>
   <Typographies>

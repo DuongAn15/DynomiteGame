@@ -13,7 +13,6 @@
 #include <touchgfx/containers/Container.hpp>
 #include <touchgfx/widgets/Button.hpp>
 #include <touchgfx/widgets/TextAreaWithWildcard.hpp>
-#include <gui/containers/endGameContainer.hpp>
 
 class GameplayScreenViewBase : public touchgfx::View<GameplayScreenPresenter>
 {
@@ -21,6 +20,14 @@ public:
     GameplayScreenViewBase();
     virtual ~GameplayScreenViewBase();
     virtual void setupScreen();
+
+    /*
+     * Virtual Action Handlers
+     */
+    virtual void pauseGame()
+    {
+        // Override and implement this function in GameplayScreen
+    }
 
 protected:
     FrontendApplication& application() {
@@ -41,7 +48,6 @@ protected:
     touchgfx::Button btnQuit;
     touchgfx::Image popupScore;
     touchgfx::TextAreaWithOneWildcard txtScore;
-    endGameContainer popupEndGame;
 
 private:
 

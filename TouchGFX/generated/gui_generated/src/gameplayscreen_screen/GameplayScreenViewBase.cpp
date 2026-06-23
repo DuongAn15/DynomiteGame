@@ -67,10 +67,6 @@ GameplayScreenViewBase::GameplayScreenViewBase() :
     txtScore.setWildcard(touchgfx::TypedText(T___SINGLEUSE_1JGH).getText());
     txtScore.setTypedText(touchgfx::TypedText(T___SINGLEUSE_AZI5));
     add(txtScore);
-
-    popupEndGame.setXY(20, 50);
-    popupEndGame.setVisible(false);
-    add(popupEndGame);
 }
 
 GameplayScreenViewBase::~GameplayScreenViewBase()
@@ -80,7 +76,7 @@ GameplayScreenViewBase::~GameplayScreenViewBase()
 
 void GameplayScreenViewBase::setupScreen()
 {
-    popupEndGame.initialize();
+
 }
 
 void GameplayScreenViewBase::buttonCallbackHandler(const touchgfx::AbstractButton& src)
@@ -95,8 +91,8 @@ void GameplayScreenViewBase::buttonCallbackHandler(const touchgfx::AbstractButto
     if (&src == &btnPause)
     {
         //pause
-        //When btnPause clicked change screen to EndScreen
-        //Go to EndScreen with no screen transition
-        application().gotoEndScreenScreenNoTransition();
+        //When btnPause clicked call virtual function
+        //Call pauseGame
+        pauseGame();
     }
 }

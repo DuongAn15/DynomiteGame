@@ -320,16 +320,6 @@
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/gui/src/common/FrontendApplication.cpp</locationURI>
 		</link>
 		<link>
-			<name>Application/User/gui/CustomContainer.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/gui/src/containers/CustomContainer.cpp</locationURI>
-		</link>
-		<link>
-			<name>Application/User/gui/endGameContainer.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/gui/src/containers/endGameContainer.cpp</locationURI>
-		</link>
-		<link>
 			<name>Application/User/gui/EndScreenPresenter.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/gui/src/endscreen_screen/EndScreenPresenter.cpp</locationURI>
@@ -483,16 +473,6 @@
 			<name>Application/User/generated/FrontendApplicationBase.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/gui_generated/src/common/FrontendApplicationBase.cpp</locationURI>
-		</link>
-		<link>
-			<name>Application/User/generated/CustomContainerBase.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/gui_generated/src/containers/CustomContainerBase.cpp</locationURI>
-		</link>
-		<link>
-			<name>Application/User/generated/endGameContainerBase.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/gui_generated/src/containers/endGameContainerBase.cpp</locationURI>
 		</link>
 		<link>
 			<name>Application/User/generated/EndScreenViewBase.cpp</name>

@@ -30,9 +30,6 @@ public:
 
     void gotoGameplayScreenScreenNoTransition();
 
-    // EndScreen
-    void gotoEndScreenScreenNoTransition();
-
 protected:
     touchgfx::Callback<FrontendApplicationBase> transitionCallback;
     FrontendHeap& frontendHeap;
@@ -47,9 +44,6 @@ protected:
     void gotoGameplayScreenScreenCoverTransitionEastImpl();
 
     void gotoGameplayScreenScreenNoTransitionImpl();
-
-    // EndScreen
-    void gotoEndScreenScreenNoTransitionImpl();
 };
 
 #endif // FRONTENDAPPLICATIONBASE_HPP

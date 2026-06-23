@@ -88,6 +88,20 @@ Xảy ra ngay sau khi xóa cụm trứng. Một số quả có thể bị rụng
 
 ---
 
-## 5. Tổng Kết
+## 5. Tích Hợp Ngoại Vi Hardware (Zero CPU Overhead)
+
+### 5.1. 4 Nút Bấm Vật Lý (Trái, Phải, Bắn, Swap)
+Tránh sử dụng ngắt ngoài (EXTI) để tránh dội bom ngắt (interrupt storm) do nhiễu cơ học (bouncing) làm tốn CPU.
+- **Giải pháp:** Kế thừa interface `touchgfx::ButtonController`.
+- **Hoạt động:** Hàm `sample()` sẽ đọc trực tiếp trạng thái GPIO. Do TouchGFX Engine tự động gọi hàm này đồng bộ với tần số quét UI (60Hz = 16.6ms), khoảng thời gian này là hoàn hảo để khử nhiễu (debounce) bằng phần mềm mà không tốn tài nguyên. Tín hiệu phím sau đó sẽ được tự động chuyển thành `handleKeyEvent` và đẩy thẳng vào file View.
+
+### 5.2. Loa MAX98357 (Âm thanh I2S)
+MAX98357 là mạch amply Class D nhận tín hiệu kỹ thuật số I2S. Tuyệt đối không dùng CPU để đẩy tuần tự từng mẫu âm thanh (sample) vào I2S bằng vòng lặp (vô cùng ngốn CPU).
+- **Giải pháp:** Sử dụng **I2S kết hợp bộ nhớ truy cập trực tiếp DMA**.
+- **Hoạt động:** Lưu trữ các âm thanh sfx (bắn trứng, vỡ trứng, nhạc nền) dưới dạng mảng C tĩnh (`const uint16_t`) trực tiếp trên bộ nhớ Flash (định dạng PCM không nén để tránh phải decode). Khởi tạo DMA đọc mảng đó nhét thẳng vào I2S. Xuyên suốt quá trình phát tiếng, DMA làm việc 100% độc lập, CPU hoàn toàn không phải tham gia. Với nhạc nền dài, cấu hình DMA ở chế độ Ping-Pong (Circular) buffer.
+
+---
+
+## 6. Tổng Kết
 
 Bằng việc kết hợp kiến trúc phần cứng DMA2D (Zero CPU image rendering) và các thuật toán Mảng phẳng (Zero CPU bit-shifting), game sẽ chạy cực kỳ mượt mà ở 60 FPS trên bộ nhớ và chip khiêm tốn của STM32, dồn toàn bộ sức mạnh cho logic game (Physics và Matching algorithms).

@@ -1,0 +1,44 @@
+# CubeMX
+.mxproject
+backup_*.ioc
+
+# TouchGFX
+TouchGFX/*_backup.touchgfx
+TouchGFX/build/
+TouchGFX/simulator/
+
+# CubeIDE
+STM32CubeIDE/.settings/
+STM32CubeIDE/Debug/
+STM32CubeIDE/Release/
+
+# Keil build output
+MDK-ARM/RTE/
+MDK-ARM/DebugConfig/
+MDK-ARM/*.lst
+MDK-ARM/*.out
+MDK-ARM/*vguix.*
+
+# IAR build output
+EWARM/settings/
+EWARM/*.dep
+EWARM/*.ewt
+EWARM/*.ipcf
+EWARM/*.custom_argvars
+
+# Generic build output
+build/
+**/Debug/
+**/Release/
+
+# Binary files
+*.o
+*.d
+*.elf
+*.map
+*.hex
+*.bin
+
+# OS files
+.DS_Store
+Thumbs.db

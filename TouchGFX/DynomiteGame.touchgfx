@@ -1,0 +1,683 @@
+{
+  "Application": {
+    "Screens": [
+      {
+        "Name": "HomeScreen",
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "backgroundStart",
+            "Width": 240,
+            "Height": 320,
+            "RelativeFilename": "backgroundStart.png"
+          },
+          {
+            "Type": "Button",
+            "Name": "btnStart",
+            "X": 72,
+            "Y": 255,
+            "Width": 96,
+            "Height": 37,
+            "Pressed": "btnStart.png",
+            "Released": "btnStart.png"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "StartGame",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "btnStart"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionCover",
+              "ScreenTransitionDirection": "East",
+              "ActionComponent": "GameplayScreen"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "GameplayScreen",
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "backgroundGame",
+            "Width": 240,
+            "Height": 320,
+            "RelativeFilename": "backgroundGamePlay.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "imgDinoHold",
+            "X": 30,
+            "Y": 227,
+            "Width": 64,
+            "Height": 64,
+            "RelativeFilename": "dino_blue.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "imgDinoThrow",
+            "X": 30,
+            "Y": 227,
+            "Width": 64,
+            "Height": 64,
+            "Visible": false,
+            "RelativeFilename": "dino_hit.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "imgDinoDone",
+            "X": 30,
+            "Y": 227,
+            "Width": 64,
+            "Height": 64,
+            "Visible": false,
+            "RelativeFilename": "dino_complete.png"
+          },
+          {
+            "Type": "TextureMapper",
+            "Name": "bulletEgg",
+            "X": 96,
+            "Y": 211,
+            "Width": 48,
+            "Height": 64,
+            "RenderingAlgorithm": "Nearest-neighbor",
+            "FileNameImage": "egg_yellow.png",
+            "LockBitmapToCenter": true,
+            "XBitmapPosition": 12.0,
+            "YBitmapPosition": 16.0,
+            "Scale": 1.0,
+            "XOrigo": 24.0,
+            "YOrigo": 32.0,
+            "ZOrigo": 1000.0,
+            "CameraDistance": 1000.0
+          },
+          {
+            "Type": "Container",
+            "Name": "eggGrid",
+            "X": 9,
+            "Y": 22,
+            "Width": 216,
+            "Height": 182,
+            "Components": []
+          },
+          {
+            "Type": "Button",
+            "Name": "btnPause",
+            "X": 3,
+            "Y": 275,
+            "Width": 42,
+            "Height": 42,
+            "Pressed": "bluePressed.png",
+            "Released": "blue.png"
+          },
+          {
+            "Type": "Button",
+            "Name": "btnQuit",
+            "X": 195,
+            "Y": 275,
+            "Width": 42,
+            "Height": 42,
+            "Pressed": "redPressed.png",
+            "Released": "red.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "popupScore",
+            "X": 22,
+            "Y": 5,
+            "Width": 196,
+            "Height": 32,
+            "RelativeFilename": "popupScore.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "txtScore",
+            "X": 91,
+            "Y": 11,
+            "Width": 50,
+            "Height": 20,
+            "TextId": "__SingleUse_AZI5",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_1JGH"
+            }
+          },
+          {
+            "Type": "CustomContainerInstance",
+            "Name": "popupEndGame",
+            "X": 20,
+            "Y": 50,
+            "Width": 200,
+            "Height": 210,
+            "Visible": false,
+            "CustomContainerDefinitionName": "endGameContainer"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "quit",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "btnQuit"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionCover",
+              "ScreenTransitionDirection": "East",
+              "ActionComponent": "HomeScreen"
+            }
+          },
+          {
+            "InteractionName": "pause",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "btnPause"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "EndScreen"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "EndScreen",
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "backgroundEnd",
+            "Width": 240,
+            "Height": 320,
+            "RelativeFilename": "backgroundEnd.png"
+          },
+          {
+            "Type": "Button",
+            "Name": "btnHome",
+            "Y": 278,
+            "Width": 42,
+            "Height": 42,
+            "Pressed": "btnHome.png",
+            "Released": "btnHome.png"
+          },
+          {
+            "Type": "Button",
+            "Name": "btnReplay",
+            "X": 198,
+            "Y": 278,
+            "Width": 42,
+            "Height": 42,
+            "Pressed": "btnReplay.png",
+            "Released": "btnReplay.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "txtScore",
+            "X": 80,
+            "Y": 136,
+            "Width": 80,
+            "Height": 15,
+            "TextId": "__SingleUse_0STL",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_ROCW"
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "txtHighScore",
+            "X": 80,
+            "Y": 182,
+            "Width": 80,
+            "Height": 15,
+            "TextId": "__SingleUse_VORU",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_681F"
+            }
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Replay",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "btnReplay"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "GameplayScreen"
+            }
+          },
+          {
+            "InteractionName": "GoHome",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "btnHome"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "HomeScreen"
+            }
+          }
+        ]
+      }
+    ],
+    "CustomContainerDefinitions": [
+      {
+        "Name": "endGameContainer",
+        "X": 20,
+        "Y": 50,
+        "Width": 200,
+        "Height": 210,
+        "Components": [
+          {
+            "Type": "Box",
+            "Name": "popBackground",
+            "Width": 200,
+            "Height": 210,
+            "Alpha": 160
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textStatus",
+            "Y": 15,
+            "Width": 200,
+            "Height": 40,
+            "TextId": "__SingleUse_BHV4",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 242,
+              "Green": 175,
+              "Blue": 17
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textScore",
+            "Y": 55,
+            "Width": 200,
+            "Height": 30,
+            "TextId": "__SingleUse_ZTWO",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 245,
+              "Green": 235,
+              "Blue": 235
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_Y8MO"
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textHighScore",
+            "Y": 90,
+            "Width": 200,
+            "Height": 30,
+            "TextId": "__SingleUse_MR4G",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 245,
+              "Green": 10,
+              "Blue": 10
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_MHSD"
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textNewRecord",
+            "Y": 120,
+            "Width": 200,
+            "Height": 30,
+            "Visible": false,
+            "TextId": "__SingleUse_XYO6",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 56,
+              "Green": 245,
+              "Blue": 27
+            }
+          },
+          {
+            "Type": "Button",
+            "Name": "btnReplay",
+            "X": 75,
+            "Y": 152,
+            "Width": 50,
+            "Height": 50,
+            "Pressed": "REPLAY.png",
+            "Released": "REPLAY.png"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "replay",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "btnReplay"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "replayClicked"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "CustomContainer",
+        "X": 12,
+        "Y": 25,
+        "Width": 216,
+        "Height": 182,
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "image1_7",
+            "X": 168,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_8",
+            "X": 192,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1",
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_1",
+            "X": 24,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_2",
+            "X": 48,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_3",
+            "X": 72,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_4",
+            "X": 96,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_5",
+            "X": 120,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_6",
+            "X": 144,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_7_2",
+            "X": 168,
+            "Y": 48,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_8_2",
+            "X": 192,
+            "Y": 48,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_9",
+            "Y": 48,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_1_2",
+            "X": 24,
+            "Y": 48,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_2_2",
+            "X": 48,
+            "Y": 48,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_3_2",
+            "X": 72,
+            "Y": 48,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_4_2",
+            "X": 96,
+            "Y": 48,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_5_2",
+            "X": 120,
+            "Y": 48,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_6_2",
+            "X": 144,
+            "Y": 48,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_7_1",
+            "X": 154,
+            "Y": 24,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_8_1",
+            "X": 178,
+            "Y": 24,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_1_1",
+            "X": 12,
+            "Y": 24,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_2_1",
+            "X": 36,
+            "Y": 24,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_3_1",
+            "X": 60,
+            "Y": 24,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_4_1",
+            "X": 84,
+            "Y": 24,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_5_1",
+            "X": 108,
+            "Y": 24,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "image1_6_1",
+            "X": 132,
+            "Y": 24,
+            "Width": 24,
+            "Height": 32,
+            "RelativeFilename": "egg_orange.png"
+          }
+        ],
+        "Interactions": []
+      }
+    ],
+    "Name": "DynomiteGame",
+    "Resolution": {
+      "Width": 240,
+      "Height": 320
+    },
+    "SelectedColorDepth": 16,
+    "StartupScreenName": "HomeScreen",
+    "SelectedStartupLanguage": "GB",
+    "TouchGfxPath": "../Middlewares/ST/touchgfx",
+    "UIPath": ".",
+    "AvailableColorDepths": [
+      16
+    ],
+    "AvailableLCDs": {
+      "16": "LCD16bpp"
+    },
+    "AvailableSections": [
+      "ExtFlashSection",
+      "IntFlashSection"
+    ],
+    "AvailableResolutions": [
+      {
+        "Width": 240,
+        "Height": 320
+      }
+    ],
+    "PhysicalButtons": [],
+    "FrameworkFeatures": {
+      "LCD16bpp": {
+        "Id": "LCD16bpp",
+        "IsEnabled": true
+      }
+    },
+    "GenerateAssetsCommand": "make -f simulator/gcc/Makefile assets -j8",
+    "PostGenerateCommand": "touchgfx update_project --project-file=simulator/msvs/Application.vcxproj",
+    "PostGenerateTargetCommand": "touchgfx update_project",
+    "CompileSimulatorCommand": "make -f simulator/gcc/Makefile -j8",
+    "RunSimulatorCommand": "build\\bin\\simulator.exe",
+    "CompileTargetCommandOverride": "make -f ../gcc/Makefile -j8",
+    "FlashTargetCommandOverride": "make -f ../gcc/Makefile flash",
+    "LandscapeSkinX": 0,
+    "LandscapeSkinY": 0,
+    "PortraitSkinX": 0,
+    "PortraitSkinY": 0,
+    "DisplayOrientation": "Portrait",
+    "Family": "STM32F4",
+    "SubFamily": "STM32F429/439",
+    "Toolchain": "STM32CubeIDE",
+    "Platform": "m4",
+    "ProjectFile": "../STM32F429I_DISCO_REV_D01.ioc",
+    "OptionalComponentsRoot": "../Middlewares/ST/touchgfx_components",
+    "OptionalComponents": [],
+    "AdditionalFeatures": [
+      "CWRVector",
+      "VectorFonts"
+    ]
+  },
+  "Version": "4.25.0",
+  "CreatedBy": "4.25.0"
+}

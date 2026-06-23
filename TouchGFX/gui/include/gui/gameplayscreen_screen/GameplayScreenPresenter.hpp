@@ -27,6 +27,10 @@ public:
 
     virtual ~GameplayScreenPresenter() {}
 
+    void handleTouchAim(int x, int y);
+    void handleTouchShoot(int x, int y);
+    uint8_t getGridCell(int row, int col) const;
+
 private:
     GameplayScreenPresenter();
 

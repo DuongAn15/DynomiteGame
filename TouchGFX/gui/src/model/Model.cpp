@@ -24,7 +24,8 @@ void Model::startNewGame()
     
     // Khởi tạo một vài hàng trứng ngẫu nhiên ban đầu để test
     for(int row = 0; row < 3; row++) {
-        for(int col = 0; col < MAX_COLS; col++) {
+        int maxCol = (row % 2 != 0) ? (MAX_COLS - 1) : MAX_COLS;
+        for(int col = 0; col < maxCol; col++) {
             grid[row * MAX_COLS + col] = 1 + ((row + col) % 6); 
         }
     }

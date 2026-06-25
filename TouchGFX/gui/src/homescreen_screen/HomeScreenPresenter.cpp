@@ -9,7 +9,9 @@ HomeScreenPresenter::HomeScreenPresenter(HomeScreenView& v)
 
 void HomeScreenPresenter::activate()
 {
-
+    if (model) {
+        model->startNewGame();
+    }
 }
 
 void HomeScreenPresenter::deactivate()

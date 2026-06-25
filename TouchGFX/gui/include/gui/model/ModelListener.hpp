@@ -14,6 +14,12 @@ public:
     {
         model = m;
     }
+    
+    // UI Notifications
+    virtual void notifyGameOver() {}
+    virtual void notifyScoreUpdated(int newScore) {}
+    virtual void notifyGridShifted() {}
+    
 protected:
     Model* model;
 };

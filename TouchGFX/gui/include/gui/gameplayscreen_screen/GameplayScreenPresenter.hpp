@@ -27,6 +27,27 @@ public:
 
     virtual ~GameplayScreenPresenter() {}
 
+    void handleTouchAim(int x, int y);
+    void handleTouchShoot(int x, int y);
+    void tick();
+
+    uint8_t getGridCell(int row, int col) const;
+    float getBulletX() const;
+    float getBulletY() const;
+    int getCurrentColor() const;
+    int getNextColor() const;
+    DinoState getDinoState() const;
+    GameState getGameState() const;
+    bool isBulletVisible() const;
+    bool isCollisionAt(float x, float y) const;
+    float getGlobalOffsetY() const;
+    int getGridParityOffset() const;
+    
+    // ModelListener overrides
+    void notifyGameOver() override;
+    void notifyScoreUpdated(int newScore) override;
+    void notifyGridShifted() override;
+
 private:
     GameplayScreenPresenter();
 

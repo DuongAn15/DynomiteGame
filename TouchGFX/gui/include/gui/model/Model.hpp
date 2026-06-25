@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 
-
 #include <gui/common/GameConstants.hpp>
 
 enum GameState {
@@ -114,6 +113,9 @@ private:
     int rowSpawnInterval;
     int rowsSpawnedCount;
 
+    // TEST counter (hardware button test)
+    int hwTestCounter = 0;
+
     // Các hàm nội bộ của Core Game
     void updateFlyingPhysics();
     void snapToGrid(float px, float py, int &outCol, int &outRow);
@@ -140,3 +142,4 @@ private:
 };
 
 #endif // MODEL_HPP
+

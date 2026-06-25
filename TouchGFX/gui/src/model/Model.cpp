@@ -3,7 +3,14 @@
 #include <math.h>
 #include <string.h>
 
+// Hardware buttons (STM32 side)
+#include <hw_buttons.h>
+
+extern volatile ButtonEvent_t g_buttonEvent;
+
+
 using namespace GameConstants;
+
 
 Model::Model() : modelListener(0), highScore(0), rngState(RNG_INITIAL_SEED)
 {
@@ -61,6 +68,31 @@ void Model::startNewGame()
 
 void Model::tick()
 {
+    // Read hardware button events (single-shot test)
+    switch (g_buttonEvent) {
+        case BTN_LEFT:
+            hwTestCounter++;
+            break;
+        case BTN_RIGHT:
+            hwTestCounter--;
+            break;
+        case BTN_FIRE:
+            gameState = STATE_AIMING;
+            break;
+        case BTN_COLOR: {
+            int tmp = currentColor;
+            currentColor = nextColor;
+            nextColor = tmp;
+            break;
+        }
+        default:
+            break;
+    }
+    
+    // Clear event after handling (producer/ISR can set it again)
+    g_buttonEvent = BTN_NONE;
+
+
     // Dino animation update
     if (dinoState == DINO_THROW) {
         dinoAnimTimer--;

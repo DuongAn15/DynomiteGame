@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+
 #include <gui/common/GameConstants.hpp>
 
 enum GameState {
@@ -10,7 +11,8 @@ enum GameState {
     STATE_AIMING,
     STATE_FLYING,
     STATE_CLEARING,
-    STATE_GAME_OVER
+    STATE_GAME_OVER,
+    STATE_PAUSE
 };
 
 enum DinoState {
@@ -39,11 +41,24 @@ public:
 
     // Bắt đầu game mới
     void startNewGame();
+    void pauseGame() { 
+        if (gameState != STATE_PAUSE) {
+            prePauseState = gameState;
+            gameState = STATE_PAUSE;
+        }
+    }
+    void resumeGame() { 
+        if (gameState == STATE_PAUSE) {
+            gameState = prePauseState;
+        }
+    }
 
     // Getter cho UI (View) cập nhật
     GameState getGameState() const { return gameState; }
     inline int getPhysicalIndex(int logicalRow, int col) const {
-        return ((headRowIndex + logicalRow) % GameConstants::MAX_ROWS) * GameConstants::MAX_COLS + col;
+        int r = headRowIndex + logicalRow;
+        if (r >= GameConstants::MAX_ROWS) r -= GameConstants::MAX_ROWS;
+        return r * GameConstants::MAX_COLS + col;
     }
     uint8_t getGridCell(int row, int col) const { return grid[getPhysicalIndex(row, col)]; }
     float getBulletX() const { return bulletX; }
@@ -51,6 +66,7 @@ public:
     int getCurrentColor() const { return currentColor; }
     int getNextColor() const { return nextColor; }
     int getScore() const { return score; }
+    int getHighScore() const { return highScore; }
     DinoState getDinoState() const { return dinoState; }
     bool isBulletVisible() const { return bulletVisible; }
     float getGlobalOffsetY() const { return globalOffsetY; }
@@ -67,6 +83,7 @@ private:
     uint8_t grid[GameConstants::MAX_ROWS * GameConstants::MAX_COLS];
     int headRowIndex = 0;
     GameState gameState;
+    GameState prePauseState;
     
     // Tọa độ quả trứng đang bay (float để nội suy mượt mà qua FPU)
     float bulletX;
@@ -77,6 +94,7 @@ private:
     int currentColor;
     int nextColor;
     int score;
+    int highScore;
     bool bulletVisible;
 
     // Dino animation
@@ -90,6 +108,11 @@ private:
     int clearingTimer;
     int totalTicks;
     float globalOffsetY;
+    
+    // Row spawn timer (frame counting)
+    int rowSpawnTimer;
+    int rowSpawnInterval;
+    int rowsSpawnedCount;
 
     // Các hàm nội bộ của Core Game
     void updateFlyingPhysics();

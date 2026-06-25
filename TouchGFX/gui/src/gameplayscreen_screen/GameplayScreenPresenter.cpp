@@ -11,7 +11,16 @@ void GameplayScreenPresenter::activate()
 {
     if (model->getGameState() == STATE_GAME_OVER) {
         model->startNewGame();
+    } else if (model->getGameState() == STATE_PAUSE) {
+        model->resumeGame();
     }
+    // Dong bo score hien tai len View khi vao man hinh (fix resume hien thi 0)
+    view.updateScore(model->getScore());
+}
+
+void GameplayScreenPresenter::pauseGame()
+{
+    model->pauseGame();
 }
 
 void GameplayScreenPresenter::deactivate()

@@ -9,7 +9,7 @@ EndScreenPresenter::EndScreenPresenter(EndScreenView& v)
 
 void EndScreenPresenter::activate()
 {
-
+    view.setScores(model->getScore(), model->getHighScore());
 }
 
 void EndScreenPresenter::deactivate()

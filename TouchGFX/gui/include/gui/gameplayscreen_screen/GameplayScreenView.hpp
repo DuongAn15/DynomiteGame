@@ -15,6 +15,7 @@ public:
     virtual void setupScreen();
     virtual void tearDownScreen();
     
+    virtual void pauseGame();
     void hideTrajectory();
     
     void updateScore(int newScore);

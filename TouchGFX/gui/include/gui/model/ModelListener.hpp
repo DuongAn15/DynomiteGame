@@ -19,6 +19,7 @@ public:
     virtual void notifyGameOver() {}
     virtual void notifyScoreUpdated(int newScore) {}
     virtual void notifyGridShifted() {}
+    virtual void notifyTurnEnd() {}
     
 protected:
     Model* model;

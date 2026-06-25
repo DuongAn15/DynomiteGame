@@ -29,6 +29,7 @@ public:
 
     void handleTouchAim(int x, int y);
     void handleTouchShoot(int x, int y);
+    void pauseGame();
     void tick();
 
     uint8_t getGridCell(int row, int col) const;

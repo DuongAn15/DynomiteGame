@@ -355,6 +355,46 @@
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/gui/src/model/Model.cpp</locationURI>
 		</link>
 		<link>
+			<name>Application/User/gui/TestCollision.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/gui/tests/TestCollision.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/gui/TestFloatingEggs.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/gui/tests/TestFloatingEggs.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/gui/TestGameOver.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/gui/tests/TestGameOver.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/gui/TestGridMath.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/gui/tests/TestGridMath.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/gui/TestInfiniteMode.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/gui/tests/TestInfiniteMode.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/gui/TestMatchLogic.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/gui/tests/TestMatchLogic.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/gui/TestPredictiveRaycast.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/gui/tests/TestPredictiveRaycast.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/gui/main_test.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/gui/tests/main_test.cpp</locationURI>
+		</link>
+		<link>
 			<name>Application/User/generated/ApplicationFontProvider.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/fonts/src/ApplicationFontProvider.cpp</locationURI>

@@ -44,7 +44,7 @@ GameplayScreenViewBase::GameplayScreenViewBase() :
     bulletEgg.setRenderingAlgorithm(touchgfx::TextureMapper::NEAREST_NEIGHBOR);
     add(bulletEgg);
 
-    eggGrid.setPosition(9, 22, 216, 182);
+    eggGrid.setPosition(9, 22, 216, 224);
     add(eggGrid);
 
     btnPause.setXY(3, 275);

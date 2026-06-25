@@ -29,6 +29,8 @@ void GameplayScreenView::setupScreen()
     lastNextColor = nextColor;
     lastDinoState = -1;
     lastColor = -1;
+    lastBulletX = -1;
+    lastBulletY = -1;
 
     // Yêu cầu 1: Mở rộng lưới eggGrid
     eggGrid.setWidth(EGG_GRID_WIDTH);
@@ -47,6 +49,12 @@ void GameplayScreenView::setupScreen()
 void GameplayScreenView::tearDownScreen()
 {
     GameplayScreenViewBase::tearDownScreen();
+}
+
+void GameplayScreenView::pauseGame()
+{
+    presenter->pauseGame();
+    application().gotoEndScreenScreenNoTransition();
 }
 
 void GameplayScreenView::hideTrajectory()
@@ -93,6 +101,15 @@ void GameplayScreenView::handleClickEvent(const touchgfx::ClickEvent& evt)
     GameplayScreenViewBase::handleClickEvent(evt);
     if (evt.getType() == touchgfx::ClickEvent::PRESSED)
     {
+        {
+            int x = evt.getX(), y = evt.getY();
+            if (x >= btnPause.getX() && x <= btnPause.getX() + btnPause.getWidth() &&
+                y >= btnPause.getY() && y <= btnPause.getY() + btnPause.getHeight())
+                return;
+            if (x >= btnQuit.getX() && x <= btnQuit.getX() + btnQuit.getWidth() &&
+                y >= btnQuit.getY() && y <= btnQuit.getY() + btnQuit.getHeight())
+                return;
+        }
         isAiming = true;
         aimX = evt.getX();
         aimY = evt.getY();
@@ -102,6 +119,7 @@ void GameplayScreenView::handleClickEvent(const touchgfx::ClickEvent& evt)
     }
     else if (evt.getType() == touchgfx::ClickEvent::RELEASED)
     {
+        if (!isAiming) return;
         isAiming = false;
         // Bắn đạn theo hệ tọa độ đã được làm mượt để đồng bộ với UI nét đứt
         presenter->handleTouchShoot((int)smoothedAimX, (int)smoothedAimY);
@@ -318,7 +336,7 @@ void GameplayScreenView::updateGrid()
                     eggImages[row][col].setBitmap(touchgfx::Bitmap(bmpId));
                     
                     int parity = presenter->getGridParityOffset();
-                    int x = ((row + parity) % 2 == 0) ? UI_CELL_X_EVEN[col] : UI_CELL_X_ODD[col];
+                    int x = (((row + parity) & 1) == 0) ? UI_CELL_X_EVEN[col] : UI_CELL_X_ODD[col];
                     int y = UI_CELL_Y[row];
                     eggImages[row][col].setXY(x, y);
                     

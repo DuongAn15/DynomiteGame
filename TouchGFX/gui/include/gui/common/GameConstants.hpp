@@ -5,7 +5,7 @@
 
 namespace GameConstants {
     // Grid & Matrix
-    constexpr int MAX_ROWS = 9;
+    constexpr int MAX_ROWS = 10;
     constexpr int MAX_COLS = 9;
     
     // UI Layout & Grid
@@ -74,11 +74,19 @@ namespace GameConstants {
 
     // Game Logic
     constexpr uint32_t RNG_INITIAL_SEED = 12345;
+    constexpr int SPAWN_INTERVAL_START = 2800;
+    constexpr int SPAWN_INTERVAL_LUT[32] = {
+        2800,2800,2800,2800,2800,2800,2800,2800,2800,2800,
+        2600,2600,2600,2600,2600,2600,2600,2600,
+        2400,2400,2400,2400,2400,2400,
+        2200,2200,2200,2200,
+        2000,2000,2000,2000
+    };
     constexpr uint32_t RNG_MULTIPLIER = 1664525;
     constexpr uint32_t RNG_INCREMENT = 1013904223;
     constexpr int INITIAL_ROWS = 3;
-    constexpr int GAME_OVER_ROW = 7;
-    constexpr int MIN_BALLS_THRESHOLD = 8;
+    constexpr int GAME_OVER_ROW = 9;
+    constexpr int MIN_BALLS_THRESHOLD = 12;
     constexpr float DROP_SPEED_START = 0.015f; // Pixels per frame
     constexpr float DROP_SPEED_INCREMENT = 0.01f;
     constexpr float DROP_SPEED_MAX = 0.15f;
@@ -108,7 +116,7 @@ namespace GameConstants {
         GRID_START_Y + 2 * CELL_HEIGHT, GRID_START_Y + 3 * CELL_HEIGHT,
         GRID_START_Y + 4 * CELL_HEIGHT, GRID_START_Y + 5 * CELL_HEIGHT,
         GRID_START_Y + 6 * CELL_HEIGHT, GRID_START_Y + 7 * CELL_HEIGHT,
-        GRID_START_Y + 8 * CELL_HEIGHT
+        GRID_START_Y + 8 * CELL_HEIGHT, GRID_START_Y + 9 * CELL_HEIGHT
     };
 
     constexpr float MODEL_CELL_X_EVEN[MAX_COLS] = {
@@ -132,7 +140,7 @@ namespace GameConstants {
         2 * UI_CELL_HEIGHT, 3 * UI_CELL_HEIGHT,
         4 * UI_CELL_HEIGHT, 5 * UI_CELL_HEIGHT,
         6 * UI_CELL_HEIGHT, 7 * UI_CELL_HEIGHT,
-        8 * UI_CELL_HEIGHT
+        8 * UI_CELL_HEIGHT, 9 * UI_CELL_HEIGHT
     };
 
     constexpr int UI_CELL_X_EVEN[MAX_COLS] = {

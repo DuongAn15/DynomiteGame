@@ -92,7 +92,7 @@ namespace GameConstants {
     constexpr float DROP_SPEED_MAX = 0.15f;
     
     constexpr int HEX_NEIGHBORS_COUNT = 6;
-    constexpr int COLLISION_SCAN_RADIUS = 2;
+    constexpr int COLLISION_SCAN_RADIUS = 1;
     constexpr float MAX_DIST_SQ_INIT = 999999.0f;
     constexpr int MIN_MATCH_COUNT = 3;
 

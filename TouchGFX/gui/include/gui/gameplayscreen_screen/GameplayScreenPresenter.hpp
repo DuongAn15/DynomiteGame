@@ -43,6 +43,7 @@ public:
     bool isCollisionAt(float x, float y) const;
     float getGlobalOffsetY() const;
     int getGridParityOffset() const;
+    void getGridData(uint8_t* out) const;
     
     // ModelListener overrides
     void notifyGameOver() override;

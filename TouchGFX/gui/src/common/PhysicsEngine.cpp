@@ -7,12 +7,12 @@ void PhysicsEngine::computeVelocity(float dx, float dy, float speed, float& vx, 
     vy = (dy / length) * speed;
 }
 
-void PhysicsEngine::advance(float& x, float& y, float vx, float vy) {
+void PhysicsEngine::updatePosition(float& x, float& y, float vx, float vy) {
     x += vx;
     y += vy;
 }
 
-void PhysicsEngine::reflect(float& x, float& vx, float leftWall, float rightWall) {
+void PhysicsEngine::resolveReflection(float& x, float& vx, float leftWall, float rightWall) {
     if (x <= leftWall && vx < 0) {
         x = leftWall + (leftWall - x);
         vx = -vx;

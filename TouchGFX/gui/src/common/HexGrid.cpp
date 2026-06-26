@@ -14,6 +14,12 @@ int HexGrid::index(int row, int col) {
     return row * GameConstants::MAX_COLS + col;
 }
 
+int HexGrid::computePhysicalIndex(int logicalRow, int col, int headRowIndex) {
+    int r = headRowIndex + logicalRow;
+    if (r >= GameConstants::MAX_ROWS) r -= GameConstants::MAX_ROWS;
+    return HexGrid::index(r, col);
+}
+
 void HexGrid::indexToCell(int index, int& row, int& col) {
     row = index / GameConstants::MAX_COLS;
     col = index % GameConstants::MAX_COLS;

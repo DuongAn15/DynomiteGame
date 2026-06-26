@@ -152,10 +152,10 @@ void Model::handleTouchShoot(int x, int y)
 
 void Model::updateFlyingPhysics()
 {
-    PhysicsEngine::advance(bullet.x, bullet.y, bullet.vx, bullet.vy);
+    PhysicsEngine::updatePosition(bullet.x, bullet.y, bullet.vx, bullet.vy);
     
     // 1. Phan xa tuong (dong bo diem doi voi UI) va chan dinh tuong
-    PhysicsEngine::reflect(bullet.x, bullet.vx, LEFT_WALL, RIGHT_WALL);
+    PhysicsEngine::resolveReflection(bullet.x, bullet.vx, LEFT_WALL, RIGHT_WALL);
     
     // 2. Kiem tra va cham (Dung ham phi trang thai da tach)
     bool collision = isCollisionAt(bullet.x, bullet.y);
@@ -208,66 +208,12 @@ void Model::updateFlyingPhysics()
 
 void Model::snapToGrid(float px, float py, int &outCol, int &outRow)
 {
-    float minDistSq = MAX_DIST_SQ_INIT;
-    int bestC = 0, bestR = 0;
-    
-    int approxRow, approxCol;
-    HexGrid::pixelToNearestCell(px, py - globalOffsetY, gridParityOffset, approxRow, approxCol);
-    
-    int startR = approxRow - COLLISION_SCAN_RADIUS;
-    if (startR < 0) startR = 0;
-    int endR = approxRow + COLLISION_SCAN_RADIUS;
-    if (endR >= MAX_ROWS) endR = MAX_ROWS - 1;
-    int startC = approxCol - COLLISION_SCAN_RADIUS;
-    if (startC < 0) startC = 0;
-    int endC = approxCol + COLLISION_SCAN_RADIUS;
-    if (endC >= MAX_COLS) endC = MAX_COLS - 1;
-    
-    for (int r = startR; r <= endR; r++) {
-        for (int c = startC; c <= endC; c++) {
-            if (HexGrid::isValidCell(r, c, HexGrid::isEvenRow(r, gridParityOffset)) && grid[getPhysicalIndex(r, c)] == EMPTY_COLOR) {
-                bool canAttach = false;
-                if (r == 0) {
-                    canAttach = true;
-                } else {
-                    for (int i = 0; i < HEX_NEIGHBORS_COUNT; i++) {
-                        bool isEven = HexGrid::isEvenRow(r, gridParityOffset);
-                        const NeighborOffset* neighbors = HexGrid::getNeighbors(isEven);
-                        int nr = r + neighbors[i].dy;
-                        int nc = c + neighbors[i].dx;
-                        if (HexGrid::isValidCell(nr, nc, HexGrid::isEvenRow(nr, gridParityOffset)) && grid[getPhysicalIndex(nr, nc)] != EMPTY_COLOR) {
-                            canAttach = true;
-                            break;
-                        }
-                    }
-                }
-                
-                if (canAttach) {
-                    bool isEven = HexGrid::isEvenRow(r, gridParityOffset);
-                    float cx = HexGrid::cellToPixelX(c, isEven);
-                    float cy = HexGrid::cellToPixelY(r) + globalOffsetY;
-                    float distSq = CollisionEngine::distanceSquared(px, py, cx, cy);
-                    if (distSq < minDistSq) {
-                        minDistSq = distSq;
-                        bestC = c;
-                        bestR = r;
-                    }
-                }
-            }
-        }
-    }
-    if (minDistSq >= MAX_DIST_SQ_INIT) {
-        outCol = -1;
-        outRow = -1;
-    } else {
-        outCol = bestC;
-        outRow = bestR;
-    }
+    CollisionEngine::resolveSnapToGrid(px, py, outCol, outRow, grid, headRowIndex, gridParityOffset, globalOffsetY);
 }
 
 void Model::checkMatches(int col, int row)
 {
-    int matchCount = MatchEngine::findMatches(grid, headRowIndex, gridParityOffset, row, col, matchGroup, visited, algoQueueStack);
+    int matchCount = MatchEngine::computeMatches(grid, headRowIndex, gridParityOffset, row, col, matchGroup, visited, algoQueueStack);
     
     if (matchCount >= GameConstants::MIN_MATCH_COUNT) {
         gameState = GameState::STATE_WIN;
@@ -295,7 +241,7 @@ void Model::checkMatches(int col, int row)
 
 void Model::dropFloatingEggs()
 {
-    int dropCount = MatchEngine::dropFloatingEggs(grid, headRowIndex, gridParityOffset, connected, algoQueueStack);
+    int dropCount = MatchEngine::resolveFloatingEggs(grid, headRowIndex, gridParityOffset, connected, algoQueueStack);
     if (dropCount > 0) {
         player.score += dropCount * GameConstants::SCORE_DROP_ORPHAN;
     }
@@ -308,45 +254,7 @@ void Model::dropFloatingEggs()
 
 bool Model::isCollisionAt(float x, float y) const
 {
-    if (y - GameConstants::EGG_RADIUS <= GameConstants::TOP_WALL + globalOffsetY) {
-        return true;
-    }
-    
-    int approxRow, approxCol;
-    HexGrid::pixelToNearestCell(x, y - globalOffsetY, gridParityOffset, approxRow, approxCol);
-    
-    int startR = approxRow - COLLISION_SCAN_RADIUS;
-    if (startR < 0) startR = 0;
-    int endR = approxRow + COLLISION_SCAN_RADIUS;
-    if (endR >= MAX_ROWS) endR = MAX_ROWS - 1;
-    int startC = approxCol - COLLISION_SCAN_RADIUS;
-    if (startC < 0) startC = 0;
-    int endC = approxCol + COLLISION_SCAN_RADIUS;
-    if (endC >= MAX_COLS) endC = MAX_COLS - 1;
-
-    float hitRadiusSq = HITBOX_RADIUS * HITBOX_RADIUS;
-
-    for (int r = startR; r <= endR; r++) {
-        for (int c = startC; c <= endC; c++) {
-            if (HexGrid::isValidCell(r, c, HexGrid::isEvenRow(r, gridParityOffset)) && grid[getPhysicalIndex(r, c)] != EMPTY_COLOR) {
-                bool isEven = HexGrid::isEvenRow(r, gridParityOffset);
-                float px = HexGrid::cellToPixelX(c, isEven);
-                float py = HexGrid::cellToPixelY(r) + globalOffsetY;
-                
-                float dx = px - x;
-                float dy = py - y;
-                
-                float penaltyX = CollisionEngine::getWallPenalty(x, LEFT_WALL, RIGHT_WALL, HITBOX_PENALTY_MIN, HITBOX_PENALTY_MAX, HITBOX_WALL_DIST);
-                float distSq = (dx * penaltyX) * (dx * penaltyX) + (dy * 1.0f) * (dy * 1.0f);
-                
-                if (distSq < hitRadiusSq) {
-                    return true;
-                }
-            }
-        }
-    }
-    
-    return false;
+    return CollisionEngine::computeCollisionAt(x, y, grid, headRowIndex, gridParityOffset, globalOffsetY);
 }
 
 void Model::shiftGridDown() {

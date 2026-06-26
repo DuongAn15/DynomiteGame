@@ -173,11 +173,11 @@ void GameplayScreenView::handleTickEvent()
         int maxSteps = 1000; // Tránh lặp vô hạn
         
         while (maxSteps-- > 0) {
-            PhysicsEngine::advance(simX, simY, simVx, simVy);
+            PhysicsEngine::updatePosition(simX, simY, simVx, simVy);
             distTraveled += BULLET_SPEED;
             
             // Phản xạ bật tường (chỉnh tâm dội chạm mép theo chuẩn) và chặn dính tường
-            PhysicsEngine::reflect(simX, simVx, LEFT_WALL, RIGHT_WALL);
+            PhysicsEngine::resolveReflection(simX, simVx, LEFT_WALL, RIGHT_WALL);
             
             // Dự đoán va chạm: Gọi hàm phi trạng thái từ Model
             if (presenter->isCollisionAt(simX, simY)) {

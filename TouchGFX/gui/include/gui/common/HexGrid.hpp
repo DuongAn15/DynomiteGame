@@ -12,6 +12,7 @@ class HexGrid {
 public:
     static bool isEvenRow(int row, int parityOffset);
     static int index(int row, int col);
+    static int computePhysicalIndex(int logicalRow, int col, int headRowIndex);
     static void indexToCell(int index, int& row, int& col);
     static bool isValidCell(int row, int col, bool isEven);
     static float cellToPixelX(int col, bool isEven);

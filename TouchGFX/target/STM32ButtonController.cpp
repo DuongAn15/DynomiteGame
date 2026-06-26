@@ -9,15 +9,10 @@ bool STM32ButtonController::sample(uint8_t& key)
 {
     uint8_t currentKey = 0;
 
-    if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_3) == GPIO_PIN_RESET) {
-        currentKey = static_cast<uint8_t>(ButtonKeycode::Left);
-    } else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1) == GPIO_PIN_RESET) {
-        currentKey = static_cast<uint8_t>(ButtonKeycode::Right);
-    } else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2) == GPIO_PIN_RESET) {
-        currentKey = static_cast<uint8_t>(ButtonKeycode::Fire);
-    } else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3) == GPIO_PIN_RESET) {
-        currentKey = static_cast<uint8_t>(ButtonKeycode::Swap);
-    }
+    // LƯU Ý: Đã gỡ bỏ cấu hình đọc GPIO sai (PC3, PA1, PA2, PA3) vì chúng xung đột với LTDC và FMC.
+    // Nếu có shield gắn ngoài, hãy cấu hình đúng chân và ghi vào đây.
+    // Tạm thời trả về 0 (không có phím cứng) để dùng Touch.
+    currentKey = 0;
 
     if (currentKey == 0)
     {

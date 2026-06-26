@@ -6,6 +6,7 @@
 
 #include <gui/common/GameConstants.hpp>
 #include <gui/common/HexGrid.hpp>
+#include <gui/common/PhysicsEngine.hpp>
 
 enum GameState {
     STATE_IDLE,

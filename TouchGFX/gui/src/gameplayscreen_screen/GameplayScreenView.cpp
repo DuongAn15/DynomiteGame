@@ -1,5 +1,7 @@
 #include <gui/gameplayscreen_screen/GameplayScreenView.hpp>
 #include <BitmapDatabase.hpp>
+#include <gui/common/PhysicsEngine.hpp>
+#include <gui/common/HexGrid.hpp>
 #include <cstring>
 #include <touchgfx/Color.hpp>
 #include <math.h>
@@ -156,14 +158,13 @@ void GameplayScreenView::handleTickEvent()
         float dx = smoothedAimX - BULLET_START_X;
         float dy = smoothedAimY - BULLET_START_Y;
         if (dy > AIM_MIN_DY) dy = AIM_MIN_DY;
-        float length = sqrtf(dx*dx + dy*dy);
         
         // Reset toàn bộ chấm ảo về trạng thái ẩn
         hideTrajectory();
         
         // Predictive Raycasting
-        float simVx = (dx / length) * BULLET_SPEED;
-        float simVy = (dy / length) * BULLET_SPEED;
+        float simVx, simVy;
+        PhysicsEngine::computeVelocity(dx, dy, BULLET_SPEED, simVx, simVy);
         float simX = BULLET_START_X;
         float simY = BULLET_START_Y;
         
@@ -172,18 +173,11 @@ void GameplayScreenView::handleTickEvent()
         int maxSteps = 1000; // Tránh lặp vô hạn
         
         while (maxSteps-- > 0) {
-            simX += simVx;
-            simY += simVy;
+            PhysicsEngine::advance(simX, simY, simVx, simVy);
             distTraveled += BULLET_SPEED;
             
             // Phản xạ bật tường (chỉnh tâm dội chạm mép theo chuẩn) và chặn dính tường
-            if (simX <= LEFT_WALL && simVx < 0) {
-                simX = LEFT_WALL + (LEFT_WALL - simX);
-                simVx = -simVx;
-            } else if (simX >= RIGHT_WALL && simVx > 0) {
-                simX = RIGHT_WALL - (simX - RIGHT_WALL);
-                simVx = -simVx;
-            }
+            PhysicsEngine::reflect(simX, simVx, LEFT_WALL, RIGHT_WALL);
             
             // Dự đoán va chạm: Gọi hàm phi trạng thái từ Model
             if (presenter->isCollisionAt(simX, simY)) {

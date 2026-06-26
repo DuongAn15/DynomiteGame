@@ -105,11 +105,6 @@ namespace GameConstants {
     constexpr int COLOR_RED = 6;
     constexpr int COLOR_YELLOW = 7;
 
-    // LUTs (Pre-computed Lookup Tables)
-    constexpr int NEIGHBOR_OFFSETS[2][HEX_NEIGHBORS_COUNT][2] = {
-        {{-1,-1}, { 0,-1}, {-1, 0}, { 1, 0}, {-1, 1}, { 0, 1}}, // EVEN row
-        {{ 0,-1}, { 1,-1}, {-1, 0}, { 1, 0}, { 0, 1}, { 1, 1}}  // ODD row
-    };
 
     constexpr float MODEL_CELL_Y[MAX_ROWS] = {
         GRID_START_Y + 0 * CELL_HEIGHT, GRID_START_Y + 1 * CELL_HEIGHT,

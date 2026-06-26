@@ -136,11 +136,7 @@ void Model::handleTouchShoot(int x, int y)
         // Chan ban ngang hoac ban xuong
         if (dy > AIM_MIN_DY) dy = AIM_MIN_DY;
         
-        float length = sqrtf(dx*dx + dy*dy);
-        float speed = BULLET_SPEED;
-        
-        bullet.vx = (dx / length) * speed;
-        bullet.vy = (dy / length) * speed;
+        PhysicsEngine::computeVelocity(dx, dy, BULLET_SPEED, bullet.vx, bullet.vy);
         
         bullet.x = BULLET_START_X;
         bullet.y = BULLET_START_Y;
@@ -156,18 +152,10 @@ void Model::handleTouchShoot(int x, int y)
 
 void Model::updateFlyingPhysics()
 {
-    bullet.x += bullet.vx;
-    bullet.y += bullet.vy;
+    PhysicsEngine::advance(bullet.x, bullet.y, bullet.vx, bullet.vy);
     
     // 1. Phan xa tuong (dong bo diem doi voi UI) va chan dinh tuong
-    if (bullet.x <= LEFT_WALL && bullet.vx < 0) {
-        bullet.x = LEFT_WALL + (LEFT_WALL - bullet.x);
-        bullet.vx = -bullet.vx;
-    }
-    else if (bullet.x >= RIGHT_WALL && bullet.vx > 0) {
-        bullet.x = RIGHT_WALL - (bullet.x - RIGHT_WALL);
-        bullet.vx = -bullet.vx;
-    }
+    PhysicsEngine::reflect(bullet.x, bullet.vx, LEFT_WALL, RIGHT_WALL);
     
     // 2. Kiem tra va cham (Dung ham phi trang thai da tach)
     bool collision = isCollisionAt(bullet.x, bullet.y);

@@ -10,14 +10,12 @@ struct NeighborOffset {
 
 class HexGrid {
 public:
-    static bool isEvenRow(int row, int parityOffset);
     static int index(int row, int col);
-    static int computePhysicalIndex(int logicalRow, int col, int headRowIndex);
     static void indexToCell(int index, int& row, int& col);
     static bool isValidCell(int row, int col, bool isEven);
     static float cellToPixelX(int col, bool isEven);
     static float cellToPixelY(int row);
-    static bool pixelToNearestCell(float x, float y_minus_globalOffset, int parityOffset, int& row, int& col);
+    static void pixelToRowCol(float x, float y, int& row, int& col);
     static const NeighborOffset* getNeighbors(bool isEven);
 };
 

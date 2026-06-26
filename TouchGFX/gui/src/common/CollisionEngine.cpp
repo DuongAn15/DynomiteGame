@@ -1,6 +1,7 @@
 #include <gui/common/CollisionEngine.hpp>
 #include <gui/common/GameConstants.hpp>
 #include <gui/common/HexGrid.hpp>
+#include <gui/common/GameBoardMapper.hpp>
 
 bool CollisionEngine::computeCollisionAt(
     float x, float y,
@@ -14,7 +15,7 @@ bool CollisionEngine::computeCollisionAt(
     }
     
     int approxRow, approxCol;
-    HexGrid::pixelToNearestCell(x, y - globalOffsetY, gridParityOffset, approxRow, approxCol);
+    GameBoardMapper::pixelToNearestCell(x, y - globalOffsetY, gridParityOffset, approxRow, approxCol);
     
     int startR = approxRow - GameConstants::COLLISION_SCAN_RADIUS;
     if (startR < 0) startR = 0;
@@ -29,8 +30,8 @@ bool CollisionEngine::computeCollisionAt(
 
     for (int r = startR; r <= endR; r++) {
         for (int c = startC; c <= endC; c++) {
-            if (HexGrid::isValidCell(r, c, HexGrid::isEvenRow(r, gridParityOffset)) && grid[HexGrid::computePhysicalIndex(r, c, headRowIndex)] != GameConstants::EMPTY_COLOR) {
-                bool isEven = HexGrid::isEvenRow(r, gridParityOffset);
+            if (HexGrid::isValidCell(r, c, GameBoardMapper::isLogicalRowEven(r, gridParityOffset)) && grid[GameBoardMapper::computePhysicalIndex(r, c, headRowIndex)] != GameConstants::EMPTY_COLOR) {
+                bool isEven = GameBoardMapper::isLogicalRowEven(r, gridParityOffset);
                 float px = HexGrid::cellToPixelX(c, isEven);
                 float py = HexGrid::cellToPixelY(r) + globalOffsetY;
                 
@@ -62,7 +63,7 @@ void CollisionEngine::resolveSnapToGrid(
     int bestC = 0, bestR = 0;
     
     int approxRow, approxCol;
-    HexGrid::pixelToNearestCell(px, py - globalOffsetY, gridParityOffset, approxRow, approxCol);
+    GameBoardMapper::pixelToNearestCell(px, py - globalOffsetY, gridParityOffset, approxRow, approxCol);
     
     int startR = approxRow - GameConstants::COLLISION_SCAN_RADIUS;
     if (startR < 0) startR = 0;
@@ -75,17 +76,17 @@ void CollisionEngine::resolveSnapToGrid(
     
     for (int r = startR; r <= endR; r++) {
         for (int c = startC; c <= endC; c++) {
-            if (HexGrid::isValidCell(r, c, HexGrid::isEvenRow(r, gridParityOffset)) && grid[HexGrid::computePhysicalIndex(r, c, headRowIndex)] == GameConstants::EMPTY_COLOR) {
+            if (HexGrid::isValidCell(r, c, GameBoardMapper::isLogicalRowEven(r, gridParityOffset)) && grid[GameBoardMapper::computePhysicalIndex(r, c, headRowIndex)] == GameConstants::EMPTY_COLOR) {
                 bool canAttach = false;
                 if (r == 0) {
                     canAttach = true;
                 } else {
                     for (int i = 0; i < GameConstants::HEX_NEIGHBORS_COUNT; i++) {
-                        bool isEven = HexGrid::isEvenRow(r, gridParityOffset);
+                        bool isEven = GameBoardMapper::isLogicalRowEven(r, gridParityOffset);
                         const NeighborOffset* neighbors = HexGrid::getNeighbors(isEven);
                         int nr = r + neighbors[i].dy;
                         int nc = c + neighbors[i].dx;
-                        if (HexGrid::isValidCell(nr, nc, HexGrid::isEvenRow(nr, gridParityOffset)) && grid[HexGrid::computePhysicalIndex(nr, nc, headRowIndex)] != GameConstants::EMPTY_COLOR) {
+                        if (HexGrid::isValidCell(nr, nc, GameBoardMapper::isLogicalRowEven(nr, gridParityOffset)) && grid[GameBoardMapper::computePhysicalIndex(nr, nc, headRowIndex)] != GameConstants::EMPTY_COLOR) {
                             canAttach = true;
                             break;
                         }
@@ -93,7 +94,7 @@ void CollisionEngine::resolveSnapToGrid(
                 }
                 
                 if (canAttach) {
-                    bool isEven = HexGrid::isEvenRow(r, gridParityOffset);
+                    bool isEven = GameBoardMapper::isLogicalRowEven(r, gridParityOffset);
                     float cx = HexGrid::cellToPixelX(c, isEven);
                     float cy = HexGrid::cellToPixelY(r) + globalOffsetY;
                     float distSq = CollisionEngine::computeDistanceSquared(px, py, cx, cy);

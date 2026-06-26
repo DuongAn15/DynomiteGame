@@ -29,7 +29,7 @@ void Model::startNewGame()
     
     gridParityOffset = 0;
     for(int row = 0; row < INITIAL_ROWS; row++) {
-        int maxCol = HexGrid::isEvenRow(row, gridParityOffset) ? MAX_COLS : (MAX_COLS - 1);
+        int maxCol = GameBoardMapper::isLogicalRowEven(row, gridParityOffset) ? MAX_COLS : (MAX_COLS - 1);
         for(int col = 0; col < maxCol; col++) {
             grid[getPhysicalIndex(row, col)] = randomColor();
         }
@@ -274,7 +274,7 @@ void Model::shiftGridDown() {
     gridParityOffset = (gridParityOffset + 1) & 1;
     
     // Random hang 0 moi (100% ra bong, khong ra rong de chong ket starvation)
-    int maxC = HexGrid::isEvenRow(0, gridParityOffset) ? GameConstants::MAX_COLS : (GameConstants::MAX_COLS - 1);
+    int maxC = GameBoardMapper::isLogicalRowEven(0, gridParityOffset) ? GameConstants::MAX_COLS : (GameConstants::MAX_COLS - 1);
     for (int c = 0; c < GameConstants::MAX_COLS; c++) {
         if (c < maxC) {
             grid[getPhysicalIndex(0, c)] = randomColor();

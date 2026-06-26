@@ -9,6 +9,7 @@
 #include <gui/common/PhysicsEngine.hpp>
 #include <gui/common/CollisionEngine.hpp>
 #include <gui/common/MatchEngine.hpp>
+#include <gui/common/GameBoardMapper.hpp>
 
 enum GameState {
     STATE_IDLE,
@@ -90,9 +91,7 @@ public:
     // Getter cho UI (View) cập nhật
     GameState getGameState() const { return gameState; }
     inline int getPhysicalIndex(int logicalRow, int col) const {
-        int r = headRowIndex + logicalRow;
-        if (r >= GameConstants::MAX_ROWS) r -= GameConstants::MAX_ROWS;
-        return HexGrid::index(r, col);
+        return GameBoardMapper::computePhysicalIndex(logicalRow, col, headRowIndex);
     }
     uint8_t getGridCell(int row, int col) const { return grid[getPhysicalIndex(row, col)]; }
     float getBulletX() const { return bullet.x; }

@@ -6,18 +6,8 @@ static const NeighborOffset neighbors[2][6] = {
     {{ 0,-1}, { 1,-1}, {-1, 0}, { 1, 0}, { 0, 1}, { 1, 1}}  // ODD row
 };
 
-bool HexGrid::isEvenRow(int row, int parityOffset) {
-    return ((row + parityOffset) & 1) == 0;
-}
-
 int HexGrid::index(int row, int col) {
     return row * GameConstants::MAX_COLS + col;
-}
-
-int HexGrid::computePhysicalIndex(int logicalRow, int col, int headRowIndex) {
-    int r = headRowIndex + logicalRow;
-    if (r >= GameConstants::MAX_ROWS) r -= GameConstants::MAX_ROWS;
-    return HexGrid::index(r, col);
 }
 
 void HexGrid::indexToCell(int index, int& row, int& col) {
@@ -39,10 +29,9 @@ float HexGrid::cellToPixelY(int row) {
     return GameConstants::MODEL_CELL_Y[row];
 }
 
-bool HexGrid::pixelToNearestCell(float x, float y_minus_globalOffset, int parityOffset, int& row, int& col) {
-    row = (int)roundf((y_minus_globalOffset - GameConstants::GRID_START_Y) / GameConstants::CELL_HEIGHT);
+void HexGrid::pixelToRowCol(float x, float y, int& row, int& col) {
+    row = (int)roundf((y - GameConstants::GRID_START_Y) / GameConstants::CELL_HEIGHT);
     col = (int)roundf((x - GameConstants::GRID_START_X) / GameConstants::CELL_WIDTH);
-    return isValidCell(row, col, isEvenRow(row, parityOffset));
 }
 
 const NeighborOffset* HexGrid::getNeighbors(bool isEven) {

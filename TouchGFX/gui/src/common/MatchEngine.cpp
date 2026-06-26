@@ -1,5 +1,6 @@
 #include <gui/common/MatchEngine.hpp>
 #include <gui/common/HexGrid.hpp>
+#include <gui/common/GameBoardMapper.hpp>
 #include <gui/common/GameConstants.hpp>
 #include <cstring>
 
@@ -14,7 +15,7 @@ int MatchEngine::computeMatches(
     bool* visited,
     int* algoQueueStack)
 {
-    uint8_t targetColor = grid[HexGrid::computePhysicalIndex(startRow, startCol, headRowIndex)];
+    uint8_t targetColor = grid[GameBoardMapper::computePhysicalIndex(startRow, startCol, headRowIndex)];
     if (targetColor == GameConstants::EMPTY_COLOR) return 0;
     
     int totalCells = GameConstants::MAX_ROWS * GameConstants::MAX_COLS;
@@ -34,14 +35,14 @@ int MatchEngine::computeMatches(
         int c = curr & 0xFF;
         
         for (int i = 0; i < HEX_NEIGHBORS_COUNT; i++) {
-            bool isEven = HexGrid::isEvenRow(r, gridParityOffset);
+            bool isEven = GameBoardMapper::isLogicalRowEven(r, gridParityOffset);
             const NeighborOffset* neighbors = HexGrid::getNeighbors(isEven);
             int nr = r + neighbors[i].dy;
             int nc = c + neighbors[i].dx;
             
-            if (HexGrid::isValidCell(nr, nc, HexGrid::isEvenRow(nr, gridParityOffset))) {
+            if (HexGrid::isValidCell(nr, nc, GameBoardMapper::isLogicalRowEven(nr, gridParityOffset))) {
                 int nIdx = HexGrid::index(nr, nc);
-                if (!visited[nIdx] && grid[HexGrid::computePhysicalIndex(nr, nc, headRowIndex)] == targetColor) {
+                if (!visited[nIdx] && grid[GameBoardMapper::computePhysicalIndex(nr, nc, headRowIndex)] == targetColor) {
                     visited[nIdx] = true;
                     algoQueueStack[qTail++] = (nr << 8) | nc;
                 }
@@ -64,7 +65,7 @@ int MatchEngine::resolveFloatingEggs(
     int top = 0;
     
     for (int c = 0; c < GameConstants::MAX_COLS; c++) {
-        if (grid[HexGrid::computePhysicalIndex(0, c, headRowIndex)] != GameConstants::EMPTY_COLOR) {
+        if (grid[GameBoardMapper::computePhysicalIndex(0, c, headRowIndex)] != GameConstants::EMPTY_COLOR) {
             algoQueueStack[top++] = (0 << 8) | c;
             connected[HexGrid::index(0, c)] = true;
         }
@@ -76,14 +77,14 @@ int MatchEngine::resolveFloatingEggs(
         int c = curr & 0xFF;
         
         for (int i = 0; i < HEX_NEIGHBORS_COUNT; i++) {
-            bool isEven = HexGrid::isEvenRow(r, gridParityOffset);
+            bool isEven = GameBoardMapper::isLogicalRowEven(r, gridParityOffset);
             const NeighborOffset* neighbors = HexGrid::getNeighbors(isEven);
             int nr = r + neighbors[i].dy;
             int nc = c + neighbors[i].dx;
             
-            if (HexGrid::isValidCell(nr, nc, HexGrid::isEvenRow(nr, gridParityOffset))) {
+            if (HexGrid::isValidCell(nr, nc, GameBoardMapper::isLogicalRowEven(nr, gridParityOffset))) {
                 int nIdx = HexGrid::index(nr, nc);
-                if (!connected[nIdx] && grid[HexGrid::computePhysicalIndex(nr, nc, headRowIndex)] != GameConstants::EMPTY_COLOR) {
+                if (!connected[nIdx] && grid[GameBoardMapper::computePhysicalIndex(nr, nc, headRowIndex)] != GameConstants::EMPTY_COLOR) {
                     connected[nIdx] = true;
                     algoQueueStack[top++] = (nr << 8) | nc;
                 }
@@ -94,8 +95,8 @@ int MatchEngine::resolveFloatingEggs(
     int dropCount = 0;
     int r = 0, c = 0;
     for (int i = 0; i < totalCells; i++) {
-        if (grid[HexGrid::computePhysicalIndex(r, c, headRowIndex)] != GameConstants::EMPTY_COLOR && !connected[i]) {
-            grid[HexGrid::computePhysicalIndex(r, c, headRowIndex)] = GameConstants::EMPTY_COLOR;
+        if (grid[GameBoardMapper::computePhysicalIndex(r, c, headRowIndex)] != GameConstants::EMPTY_COLOR && !connected[i]) {
+            grid[GameBoardMapper::computePhysicalIndex(r, c, headRowIndex)] = GameConstants::EMPTY_COLOR;
             dropCount++;
         }
         c++;

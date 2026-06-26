@@ -104,8 +104,6 @@ void Model::tick()
         clearingTimer--;
         if (clearingTimer <= 0) {
             gameState = STATE_IDLE;
-            currentColor = nextColor;
-            nextColor = randomColor();
             bulletVisible = false;
             if (modelListener) modelListener->notifyTurnEnd();
         }
@@ -194,12 +192,14 @@ void Model::updateFlyingPhysics()
         
         // An bullet sau khi gan vao luoi
         bulletVisible = false;
+        currentColor = nextColor;
+        nextColor = randomColor();
         
         // Neu khong co bong no/roi (score khong doi) thi moi Game Over neu co bong o hang 9
         if (score == oldScore) {
             bool isGameOver = false;
-            for (int c = 0; c < MAX_COLS; c++) {
-                if (grid[getPhysicalIndex(GAME_OVER_ROW, c)] != EMPTY_COLOR) {
+            for (int c = 0; c < GameConstants::MAX_COLS; c++) {
+                if (grid[getPhysicalIndex(GAME_OVER_ROW, c)] != GameConstants::EMPTY_COLOR) {
                     isGameOver = true;
                     break;
                 }
@@ -211,8 +211,6 @@ void Model::updateFlyingPhysics()
             } else {
                 if (gameState != STATE_CLEARING) { 
                     gameState = STATE_IDLE;
-                    currentColor = nextColor;
-                    nextColor = randomColor();
                 }
             }
         }

@@ -23,6 +23,7 @@ int Model::randomColor()
 
 void Model::startNewGame()
 {
+    cachedEggCount = 0;
     memset(grid, EMPTY_COLOR, sizeof(grid));
     headRowIndex = 0;
     
@@ -31,6 +32,7 @@ void Model::startNewGame()
         int maxCol = ((row + gridParityOffset) & 1) ? (MAX_COLS - 1) : MAX_COLS;
         for(int col = 0; col < maxCol; col++) {
             grid[getPhysicalIndex(row, col)] = randomColor();
+            cachedEggCount++;
         }
     }
     
@@ -102,8 +104,6 @@ void Model::tick()
         clearingTimer--;
         if (clearingTimer <= 0) {
             gameState = STATE_IDLE;
-            currentColor = nextColor;
-            nextColor = randomColor();
             bulletVisible = false;
             if (modelListener) modelListener->notifyTurnEnd();
         }
@@ -185,18 +185,21 @@ void Model::updateFlyingPhysics()
         }
         
         grid[getPhysicalIndex(snapRow, snapCol)] = currentColor;
+        cachedEggCount++;
         
         int oldScore = score;
         checkMatches(snapCol, snapRow);
         
         // An bullet sau khi gan vao luoi
         bulletVisible = false;
+        currentColor = nextColor;
+        nextColor = randomColor();
         
         // Neu khong co bong no/roi (score khong doi) thi moi Game Over neu co bong o hang 9
         if (score == oldScore) {
             bool isGameOver = false;
-            for (int c = 0; c < MAX_COLS; c++) {
-                if (grid[getPhysicalIndex(GAME_OVER_ROW, c)] != EMPTY_COLOR) {
+            for (int c = 0; c < GameConstants::MAX_COLS; c++) {
+                if (grid[getPhysicalIndex(GAME_OVER_ROW, c)] != GameConstants::EMPTY_COLOR) {
                     isGameOver = true;
                     break;
                 }
@@ -208,8 +211,6 @@ void Model::updateFlyingPhysics()
             } else {
                 if (gameState != STATE_CLEARING) { 
                     gameState = STATE_IDLE;
-                    currentColor = nextColor;
-                    nextColor = randomColor();
                 }
             }
         }
@@ -323,6 +324,7 @@ void Model::checkMatches(int col, int row)
         for (int i = 0; i < matchCount; i++) {
             int curr = matchGroup[i];
             grid[getPhysicalIndex(curr >> 8, curr & 0xFF)] = GameConstants::EMPTY_COLOR;
+            cachedEggCount--;
         }
         
         dropFloatingEggs();
@@ -369,6 +371,7 @@ void Model::dropFloatingEggs()
     for (int i = 0; i < GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) {
         if (grid[getPhysicalIndex(r, c)] != GameConstants::EMPTY_COLOR && !connected[i]) {
             grid[getPhysicalIndex(r, c)] = GameConstants::EMPTY_COLOR;
+            cachedEggCount--;
             score += GameConstants::SCORE_DROP_ORPHAN;
             dropCount++;
         }
@@ -479,6 +482,7 @@ void Model::shiftGridDown() {
     for (int c = 0; c < GameConstants::MAX_COLS; c++) {
         if (c < maxC) {
             grid[getPhysicalIndex(0, c)] = randomColor();
+            cachedEggCount++;
         } else {
             grid[getPhysicalIndex(0, c)] = GameConstants::EMPTY_COLOR;
         }
@@ -488,11 +492,13 @@ void Model::shiftGridDown() {
 }
 
 int Model::getEggCount() const {
-    int count = 0;
+    return cachedEggCount;
+}
+
+void Model::getGridData(uint8_t* out) const {
     for (int r = 0; r < GameConstants::MAX_ROWS; r++) {
         for (int c = 0; c < GameConstants::MAX_COLS; c++) {
-            if (grid[getPhysicalIndex(r, c)] != GameConstants::EMPTY_COLOR) count++;
+            out[r * GameConstants::MAX_COLS + c] = grid[getPhysicalIndex(r, c)];
         }
     }
-    return count;
 }

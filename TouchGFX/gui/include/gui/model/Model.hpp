@@ -71,6 +71,7 @@ public:
     bool isBulletVisible() const { return bulletVisible; }
     float getGlobalOffsetY() const { return globalOffsetY; }
     int getGridParityOffset() const { return gridParityOffset; }
+    void getGridData(uint8_t* out) const;
     
     // Predictive Raycasting
     bool isCollisionAt(float x, float y) const;
@@ -79,6 +80,7 @@ protected:
     ModelListener* modelListener;
 
 private:
+    int cachedEggCount = 0;
     // Core game data - Không dùng bit-packing, dùng Flatten array
     uint8_t grid[GameConstants::MAX_ROWS * GameConstants::MAX_COLS];
     int headRowIndex = 0;

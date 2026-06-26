@@ -24,6 +24,9 @@
 
 #include "stm32f4xx.h"
 #include <touchgfx/hal/OSWrappers.hpp>
+#include <STM32ButtonController.hpp>
+
+static STM32ButtonController buttonController;
 
 extern "C" {
     void     LCD_IO_WriteReg(uint8_t Reg);
@@ -49,6 +52,8 @@ void TouchGFXHAL::initialize()
 
     // Add animation storage
     setAnimationStorage((void*)animationStorage);
+
+    setButtonController(&buttonController);
 }
 
 void TouchGFXHAL::taskEntry()

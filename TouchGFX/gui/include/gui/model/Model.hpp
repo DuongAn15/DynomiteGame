@@ -7,6 +7,7 @@
 #include <gui/common/GameConstants.hpp>
 #include <gui/common/HexGrid.hpp>
 #include <gui/common/PhysicsEngine.hpp>
+#include <gui/common/CollisionEngine.hpp>
 
 enum GameState {
     STATE_IDLE,
@@ -153,7 +154,6 @@ private:
     int matchGroup[GameConstants::MAX_ROWS * GameConstants::MAX_COLS];
     
     // Helper tọa độ & tiện ích DRY
-    float calculateDistanceSq(float x1, float y1, float x2, float y2) const;
 
     // Random
     uint32_t nextRandom();

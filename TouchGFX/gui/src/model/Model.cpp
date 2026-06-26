@@ -246,7 +246,7 @@ void Model::snapToGrid(float px, float py, int &outCol, int &outRow)
                     bool isEven = HexGrid::isEvenRow(r, gridParityOffset);
                     float cx = HexGrid::cellToPixelX(c, isEven);
                     float cy = HexGrid::cellToPixelY(r) + globalOffsetY;
-                    float distSq = calculateDistanceSq(px, py, cx, cy);
+                    float distSq = CollisionEngine::distanceSquared(px, py, cx, cy);
                     if (distSq < minDistSq) {
                         minDistSq = distSq;
                         bestC = c;
@@ -377,11 +377,6 @@ void Model::dropFloatingEggs()
     }
 }
 
-float Model::calculateDistanceSq(float x1, float y1, float x2, float y2) const
-{
-    return (x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1);
-}
-
 bool Model::isCollisionAt(float x, float y) const
 {
     if (y - GameConstants::EGG_RADIUS <= GameConstants::TOP_WALL + globalOffsetY) {
@@ -412,16 +407,7 @@ bool Model::isCollisionAt(float x, float y) const
                 float dx = px - x;
                 float dy = py - y;
                 
-                float penaltyX = HITBOX_PENALTY_MAX;
-                float distToLeft = x - LEFT_WALL;
-                float distToRight = RIGHT_WALL - x;
-                float minDistToWall = (distToLeft < distToRight) ? distToLeft : distToRight;
-                
-                if (minDistToWall < HITBOX_WALL_DIST) {
-                    if (minDistToWall < 0.0f) minDistToWall = 0.0f;
-                    penaltyX = HITBOX_PENALTY_MIN + (HITBOX_PENALTY_MAX - HITBOX_PENALTY_MIN) * (minDistToWall / HITBOX_WALL_DIST);
-                }
-                
+                float penaltyX = CollisionEngine::getWallPenalty(x, LEFT_WALL, RIGHT_WALL, HITBOX_PENALTY_MIN, HITBOX_PENALTY_MAX, HITBOX_WALL_DIST);
                 float distSq = (dx * penaltyX) * (dx * penaltyX) + (dy * 1.0f) * (dy * 1.0f);
                 
                 if (distSq < hitRadiusSq) {

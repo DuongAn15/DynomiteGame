@@ -39,6 +39,8 @@ void Model::startNewGame()
     player.currentEgg = static_cast<EggColor>(randomColor());
     player.nextEgg = static_cast<EggColor>(randomColor());
     player.score = 0;
+    player.combo = 0;
+    player.multiplier = 1;
     bullet.active = false;
     
     bullet.x = BULLET_START_X;
@@ -59,6 +61,7 @@ void Model::startNewGame()
     rowSpawnTimer = SPAWN_INTERVAL_START;
     rowSpawnInterval = SPAWN_INTERVAL_START;
     rowsSpawnedCount = 0;
+    difficultyLevel = 0;
 }
 
 void Model::tick()
@@ -85,7 +88,9 @@ void Model::tick()
             shiftGridDown();
             rowsSpawnedCount++;
             
-            int idx = rowsSpawnedCount > 31 ? 31 : rowsSpawnedCount;
+            difficultyLevel = player.score / 2000;
+            int idx = rowsSpawnedCount + difficultyLevel;
+            if (idx > 31) idx = 31;
             rowSpawnInterval = SPAWN_INTERVAL_LUT[idx];
             
             rowSpawnTimer = rowSpawnInterval;
@@ -94,7 +99,10 @@ void Model::tick()
         if (getEggCount() < MIN_BALLS_THRESHOLD) {
             shiftGridDown();
             rowsSpawnedCount++;
-            int idx = rowsSpawnedCount > 31 ? 31 : rowsSpawnedCount;
+            
+            difficultyLevel = player.score / 2000;
+            int idx = rowsSpawnedCount + difficultyLevel;
+            if (idx > 31) idx = 31;
             rowSpawnInterval = SPAWN_INTERVAL_LUT[idx];
             rowSpawnTimer = rowSpawnInterval;
         }
@@ -143,6 +151,7 @@ void Model::handleTouchShoot(int x, int y)
         bullet.active = true;
         
         gameState = GameState::STATE_SHOOTING;
+        if (modelListener) modelListener->notifyOnShoot();
 
         // Dino nem animation
         dinoState = DINO_THROW;
@@ -168,6 +177,8 @@ void Model::updateFlyingPhysics()
         // Snap that bai hoac o da bi chiem -> bo qua, mat luot
         if (snapCol < 0 || snapRow < 0 || grid[getPhysicalIndex(snapRow, snapCol)] != EMPTY_COLOR) {
             bullet.active = false;
+            player.combo = 0;
+            player.multiplier = 1;
             gameState = GameState::STATE_IDLE;
             player.currentEgg = player.nextEgg;
             player.nextEgg = static_cast<EggColor>(randomColor());
@@ -198,6 +209,8 @@ void Model::updateFlyingPhysics()
             } else {
                 if (gameState != GameState::STATE_WIN) { 
                     gameState = GameState::STATE_IDLE;
+                    player.combo = 0;
+                    player.multiplier = 1;
                     player.currentEgg = player.nextEgg;
                     player.nextEgg = static_cast<EggColor>(randomColor());
                 }
@@ -216,16 +229,26 @@ void Model::checkMatches(int col, int row)
     int matchCount = MatchEngine::computeMatches(grid, headRowIndex, gridParityOffset, row, col, matchGroup, visited, algoQueueStack);
     
     if (matchCount >= GameConstants::MIN_MATCH_COUNT) {
+        player.combo++;
+        player.multiplier = player.combo;
+        if (player.multiplier > 4) player.multiplier = 4;
+        
         gameState = GameState::STATE_WIN;
+        int baseScore = 0;
         if (matchCount == 3) {
-            player.score += GameConstants::SCORE_MATCH_3;
+            baseScore = GameConstants::SCORE_MATCH_3;
         } else if (matchCount == 4) {
-            player.score += GameConstants::SCORE_MATCH_4;
+            baseScore = GameConstants::SCORE_MATCH_4;
         } else if (matchCount >= 5) {
-            player.score += GameConstants::SCORE_MATCH_5;
+            baseScore = GameConstants::SCORE_MATCH_5;
         }
+        
+        player.score += baseScore * player.multiplier;
         if (player.score > player.highScore) player.highScore = player.score;
-        if (modelListener) modelListener->notifyScoreUpdated(player.score);
+        if (modelListener) {
+            modelListener->notifyScoreUpdated(player.score);
+            modelListener->notifyOnMatch(matchCount, player.combo);
+        }
         
         for (int i = 0; i < matchCount; i++) {
             int curr = matchGroup[i];
@@ -236,6 +259,9 @@ void Model::checkMatches(int col, int row)
         
         // Thay vi reset ve IDLE ngay, cho 30 ticks (0.5s) cho UI tha roi trung
         clearingTimer = 30;
+    } else {
+        player.combo = 0;
+        player.multiplier = 1;
     }
 }
 
@@ -243,12 +269,15 @@ void Model::dropFloatingEggs()
 {
     int dropCount = MatchEngine::resolveFloatingEggs(grid, headRowIndex, gridParityOffset, connected, algoQueueStack);
     if (dropCount > 0) {
-        player.score += dropCount * GameConstants::SCORE_DROP_ORPHAN;
+        player.score += dropCount * GameConstants::SCORE_DROP_ORPHAN * player.multiplier;
     }
     if (player.score > player.highScore) player.highScore = player.score;
     
     if (dropCount > 0) {
-        if (modelListener) modelListener->notifyScoreUpdated(player.score);
+        if (modelListener) {
+            modelListener->notifyScoreUpdated(player.score);
+            modelListener->notifyOnDrop(dropCount);
+        }
     }
 }
 

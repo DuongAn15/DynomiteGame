@@ -29,9 +29,9 @@ bool CollisionEngine::computeCollisionAt(
     float hitRadiusSq = GameConstants::HITBOX_RADIUS * GameConstants::HITBOX_RADIUS;
 
     for (int r = startR; r <= endR; r++) {
+        bool isEven = GameBoardMapper::isLogicalRowEven(r, gridParityOffset);
         for (int c = startC; c <= endC; c++) {
-            if (HexGrid::isValidCell(r, c, GameBoardMapper::isLogicalRowEven(r, gridParityOffset)) && grid[GameBoardMapper::computePhysicalIndex(r, c, headRowIndex)] != GameConstants::EMPTY_COLOR) {
-                bool isEven = GameBoardMapper::isLogicalRowEven(r, gridParityOffset);
+            if (HexGrid::isValidCell(r, c, isEven) && grid[GameBoardMapper::computePhysicalIndex(r, c, headRowIndex)] != GameConstants::EMPTY_COLOR) {
                 float px = HexGrid::cellToPixelX(c, isEven);
                 float py = HexGrid::cellToPixelY(r) + globalOffsetY;
                 
@@ -75,15 +75,15 @@ void CollisionEngine::resolveSnapToGrid(
     if (endC >= GameConstants::MAX_COLS) endC = GameConstants::MAX_COLS - 1;
     
     for (int r = startR; r <= endR; r++) {
+        bool isEven = GameBoardMapper::isLogicalRowEven(r, gridParityOffset);
+        const NeighborOffset* neighbors = HexGrid::getNeighbors(isEven);
         for (int c = startC; c <= endC; c++) {
-            if (HexGrid::isValidCell(r, c, GameBoardMapper::isLogicalRowEven(r, gridParityOffset)) && grid[GameBoardMapper::computePhysicalIndex(r, c, headRowIndex)] == GameConstants::EMPTY_COLOR) {
+            if (HexGrid::isValidCell(r, c, isEven) && grid[GameBoardMapper::computePhysicalIndex(r, c, headRowIndex)] == GameConstants::EMPTY_COLOR) {
                 bool canAttach = false;
                 if (r == 0) {
                     canAttach = true;
                 } else {
                     for (int i = 0; i < GameConstants::HEX_NEIGHBORS_COUNT; i++) {
-                        bool isEven = GameBoardMapper::isLogicalRowEven(r, gridParityOffset);
-                        const NeighborOffset* neighbors = HexGrid::getNeighbors(isEven);
                         int nr = r + neighbors[i].dy;
                         int nc = c + neighbors[i].dx;
                         if (HexGrid::isValidCell(nr, nc, GameBoardMapper::isLogicalRowEven(nr, gridParityOffset)) && grid[GameBoardMapper::computePhysicalIndex(nr, nc, headRowIndex)] != GameConstants::EMPTY_COLOR) {
@@ -94,7 +94,6 @@ void CollisionEngine::resolveSnapToGrid(
                 }
                 
                 if (canAttach) {
-                    bool isEven = GameBoardMapper::isLogicalRowEven(r, gridParityOffset);
                     float cx = HexGrid::cellToPixelX(c, isEven);
                     float cy = HexGrid::cellToPixelY(r) + globalOffsetY;
                     float distSq = CollisionEngine::computeDistanceSquared(px, py, cx, cy);

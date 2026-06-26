@@ -34,9 +34,10 @@ int MatchEngine::computeMatches(
         int r = curr >> 8;
         int c = curr & 0xFF;
         
-        for (int i = 0; i < HEX_NEIGHBORS_COUNT; i++) {
-            bool isEven = GameBoardMapper::isLogicalRowEven(r, gridParityOffset);
-            const NeighborOffset* neighbors = HexGrid::getNeighbors(isEven);
+        bool isEven = GameBoardMapper::isLogicalRowEven(r, gridParityOffset);
+        const NeighborOffset* neighbors = HexGrid::getNeighbors(isEven);
+        
+        for (int i = 0; i < GameConstants::HEX_NEIGHBORS_COUNT; i++) {
             int nr = r + neighbors[i].dy;
             int nc = c + neighbors[i].dx;
             
@@ -76,9 +77,10 @@ int MatchEngine::resolveFloatingEggs(
         int r = curr >> 8;
         int c = curr & 0xFF;
         
-        for (int i = 0; i < HEX_NEIGHBORS_COUNT; i++) {
-            bool isEven = GameBoardMapper::isLogicalRowEven(r, gridParityOffset);
-            const NeighborOffset* neighbors = HexGrid::getNeighbors(isEven);
+        bool isEven = GameBoardMapper::isLogicalRowEven(r, gridParityOffset);
+        const NeighborOffset* neighbors = HexGrid::getNeighbors(isEven);
+        
+        for (int i = 0; i < GameConstants::HEX_NEIGHBORS_COUNT; i++) {
             int nr = r + neighbors[i].dy;
             int nc = c + neighbors[i].dx;
             

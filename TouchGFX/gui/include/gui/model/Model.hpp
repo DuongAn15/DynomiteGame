@@ -48,6 +48,8 @@ struct PlayerData {
     EggColor nextEgg;
     int score;
     int highScore;
+    int combo; // Feature 1: Combo System
+    int multiplier; // Feature 1: Score Multiplier
 };
 
 enum DinoState {
@@ -138,6 +140,7 @@ private:
     int rowSpawnTimer;
     int rowSpawnInterval;
     int rowsSpawnedCount;
+    int difficultyLevel; // Feature 3: Game Difficulty Scaling
 
     // Các hàm nội bộ của Core Game
     void updateFlyingPhysics();

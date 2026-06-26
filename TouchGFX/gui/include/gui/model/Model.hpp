@@ -8,6 +8,7 @@
 #include <gui/common/HexGrid.hpp>
 #include <gui/common/PhysicsEngine.hpp>
 #include <gui/common/CollisionEngine.hpp>
+#include <gui/common/MatchEngine.hpp>
 
 enum GameState {
     STATE_IDLE,

@@ -267,39 +267,7 @@ void Model::snapToGrid(float px, float py, int &outCol, int &outRow)
 
 void Model::checkMatches(int col, int row)
 {
-    uint8_t targetColor = grid[getPhysicalIndex(row, col)];
-    if (targetColor == EMPTY_COLOR) return;
-    
-    memset(visited, 0, sizeof(visited));
-    int qHead = 0, qTail = 0;
-    
-    int matchCount = 0;
-    
-    algoQueueStack[qTail++] = (row << 8) | col;
-    visited[HexGrid::index(row, col)] = true;
-    
-    while (qHead < qTail) {
-        int curr = algoQueueStack[qHead++];
-        matchGroup[matchCount++] = curr;
-        
-        int r = curr >> 8;
-        int c = curr & 0xFF;
-        
-        for (int i = 0; i < HEX_NEIGHBORS_COUNT; i++) {
-            bool isEven = HexGrid::isEvenRow(r, gridParityOffset);
-            const NeighborOffset* neighbors = HexGrid::getNeighbors(isEven);
-            int nr = r + neighbors[i].dy;
-            int nc = c + neighbors[i].dx;
-            
-            if (HexGrid::isValidCell(nr, nc, HexGrid::isEvenRow(nr, gridParityOffset))) {
-                int nIdx = HexGrid::index(nr, nc);
-                if (!visited[nIdx] && grid[getPhysicalIndex(nr, nc)] == targetColor) {
-                    visited[nIdx] = true;
-                    algoQueueStack[qTail++] = (nr << 8) | nc;
-                }
-            }
-        }
-    }
+    int matchCount = MatchEngine::findMatches(grid, headRowIndex, gridParityOffset, row, col, matchGroup, visited, algoQueueStack);
     
     if (matchCount >= GameConstants::MIN_MATCH_COUNT) {
         gameState = GameState::STATE_WIN;
@@ -327,49 +295,10 @@ void Model::checkMatches(int col, int row)
 
 void Model::dropFloatingEggs()
 {
-    memset(connected, 0, sizeof(connected));
-    int top = 0;
-    
-    for (int c = 0; c < MAX_COLS; c++) {
-        if (grid[getPhysicalIndex(0, c)] != EMPTY_COLOR) {
-            algoQueueStack[top++] = (0 << 8) | c;
-            connected[HexGrid::index(0, c)] = true;
-        }
+    int dropCount = MatchEngine::dropFloatingEggs(grid, headRowIndex, gridParityOffset, connected, algoQueueStack);
+    if (dropCount > 0) {
+        player.score += dropCount * GameConstants::SCORE_DROP_ORPHAN;
     }
-    
-    while (top > 0) {
-        int curr = algoQueueStack[--top];
-        int r = curr >> 8;
-        int c = curr & 0xFF;
-        
-        for (int i = 0; i < HEX_NEIGHBORS_COUNT; i++) {
-            bool isEven = HexGrid::isEvenRow(r, gridParityOffset);
-            const NeighborOffset* neighbors = HexGrid::getNeighbors(isEven);
-            int nr = r + neighbors[i].dy;
-            int nc = c + neighbors[i].dx;
-            
-            if (HexGrid::isValidCell(nr, nc, HexGrid::isEvenRow(nr, gridParityOffset))) {
-                int nIdx = HexGrid::index(nr, nc);
-                if (!connected[nIdx] && grid[getPhysicalIndex(nr, nc)] != EMPTY_COLOR) {
-                    connected[nIdx] = true;
-                    algoQueueStack[top++] = (nr << 8) | nc;
-                }
-            }
-        }
-    }
-    
-    int dropCount = 0;
-    int r = 0, c = 0;
-    for (int i = 0; i < GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) {
-        if (grid[getPhysicalIndex(r, c)] != GameConstants::EMPTY_COLOR && !connected[i]) {
-            grid[getPhysicalIndex(r, c)] = GameConstants::EMPTY_COLOR;
-            player.score += GameConstants::SCORE_DROP_ORPHAN;
-            dropCount++;
-        }
-        c++;
-        if (c >= MAX_COLS) { c = 0; r++; }
-    }
-    
     if (player.score > player.highScore) player.highScore = player.score;
     
     if (dropCount > 0) {

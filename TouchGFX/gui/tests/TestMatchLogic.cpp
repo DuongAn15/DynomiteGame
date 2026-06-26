@@ -10,7 +10,7 @@ void test_match_3() {
     MockModelListener mock;
     m.bind(&mock);
     for(int i=0; i<GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) m.grid[i] = GameConstants::EMPTY_COLOR;
-    m.score = 0;
+    m.player.score = 0;
 
     // Đặt 3 quả trứng cùng màu cạnh nhau
     m.grid[0 * GameConstants::MAX_COLS + 0] = GameConstants::COLOR_RED;
@@ -25,7 +25,7 @@ void test_match_3() {
     ASSERT(m.grid[1 * GameConstants::MAX_COLS + 0] == GameConstants::EMPTY_COLOR);
 
     // Điểm phải tăng: SCORE_MATCH_3 = 3
-    ASSERT(m.score == GameConstants::SCORE_MATCH_3);
+    ASSERT(m.player.score == GameConstants::SCORE_MATCH_3);
     ASSERT(mock.isScoreUpdatedCalled == true);
     ASSERT(mock.lastScoreUpdated == GameConstants::SCORE_MATCH_3);
 }
@@ -35,7 +35,7 @@ void test_match_4() {
     MockModelListener mock;
     m.bind(&mock);
     for(int i=0; i<GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) m.grid[i] = GameConstants::EMPTY_COLOR;
-    m.score = 0;
+    m.player.score = 0;
 
     m.grid[0 * GameConstants::MAX_COLS + 0] = GameConstants::COLOR_RED;
     m.grid[0 * GameConstants::MAX_COLS + 1] = GameConstants::COLOR_RED;
@@ -44,7 +44,7 @@ void test_match_4() {
 
     m.checkMatches(0, 0);
 
-    ASSERT(m.score == GameConstants::SCORE_MATCH_4);
+    ASSERT(m.player.score == GameConstants::SCORE_MATCH_4);
     ASSERT(mock.isScoreUpdatedCalled == true);
     ASSERT(mock.lastScoreUpdated == GameConstants::SCORE_MATCH_4);
 }
@@ -54,7 +54,7 @@ void test_match_5() {
     MockModelListener mock;
     m.bind(&mock);
     for(int i=0; i<GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) m.grid[i] = GameConstants::EMPTY_COLOR;
-    m.score = 0;
+    m.player.score = 0;
 
     m.grid[0 * GameConstants::MAX_COLS + 0] = GameConstants::COLOR_RED;
     m.grid[0 * GameConstants::MAX_COLS + 1] = GameConstants::COLOR_RED;
@@ -64,7 +64,7 @@ void test_match_5() {
 
     m.checkMatches(0, 0);
 
-    ASSERT(m.score == GameConstants::SCORE_MATCH_5);
+    ASSERT(m.player.score == GameConstants::SCORE_MATCH_5);
     ASSERT(mock.isScoreUpdatedCalled == true);
     ASSERT(mock.lastScoreUpdated == GameConstants::SCORE_MATCH_5);
 }
@@ -72,7 +72,7 @@ void test_match_5() {
 void test_match_2() {
     Model m;
     for(int i=0; i<GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) m.grid[i] = GameConstants::EMPTY_COLOR;
-    m.score = 0;
+    m.player.score = 0;
 
     // Đặt 2 quả trứng cùng màu cạnh nhau
     m.grid[0 * GameConstants::MAX_COLS + 0] = GameConstants::COLOR_RED;
@@ -85,7 +85,7 @@ void test_match_2() {
     ASSERT(m.grid[0 * GameConstants::MAX_COLS + 1] == GameConstants::COLOR_RED);
 
     // Điểm không tăng
-    ASSERT(m.score == 0);
+    ASSERT(m.player.score == 0);
 }
 
 void run_MatchLogic_Tests() {

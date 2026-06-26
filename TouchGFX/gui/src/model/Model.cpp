@@ -5,8 +5,9 @@
 
 using namespace GameConstants;
 
-Model::Model() : modelListener(0), highScore(0), rngState(RNG_INITIAL_SEED)
+Model::Model() : modelListener(0), rngState(RNG_INITIAL_SEED)
 {
+    player.highScore = 0;
     startNewGame();
 }
 
@@ -34,16 +35,17 @@ void Model::startNewGame()
         }
     }
     
-    gameState = STATE_IDLE;
-    currentColor = randomColor();
-    nextColor = randomColor();
-    score = 0;
-    bulletVisible = false;
+    gameState = GameState::STATE_IDLE;
+    player.currentEgg = static_cast<EggColor>(randomColor());
+    player.nextEgg = static_cast<EggColor>(randomColor());
+    player.score = 0;
+    bullet.active = false;
     
-    bulletX = BULLET_START_X;
-    bulletY = BULLET_START_Y;
-    vx = 0.0f;
-    vy = 0.0f;
+    bullet.x = BULLET_START_X;
+    bullet.y = BULLET_START_Y;
+    bullet.vx = 0.0f;
+    bullet.vy = 0.0f;
+    player.aimAngle = 0.0f;
 
     dinoState = DINO_HOLD;
     dinoAnimTimer = 0;
@@ -75,7 +77,7 @@ void Model::tick()
         }
     }
     
-    if (gameState == STATE_IDLE || gameState == STATE_AIMING || gameState == STATE_FLYING || gameState == STATE_CLEARING) {
+    if (gameState == GameState::STATE_IDLE || gameState == GameState::STATE_AIMING || gameState == GameState::STATE_SHOOTING || gameState == GameState::STATE_WIN) {
         totalTicks++;
         
         rowSpawnTimer--;
@@ -98,18 +100,18 @@ void Model::tick()
         }
     }
 
-    if (gameState == STATE_CLEARING) {
+    if (gameState == GameState::STATE_WIN) {
         clearingTimer--;
         if (clearingTimer <= 0) {
-            gameState = STATE_IDLE;
-            currentColor = nextColor;
-            nextColor = randomColor();
-            bulletVisible = false;
+            gameState = GameState::STATE_IDLE;
+            player.currentEgg = player.nextEgg;
+            player.nextEgg = static_cast<EggColor>(randomColor());
+            bullet.active = false;
             if (modelListener) modelListener->notifyTurnEnd();
         }
     }
 
-    if (gameState == STATE_FLYING)
+    if (gameState == GameState::STATE_SHOOTING)
     {
         updateFlyingPhysics();
     }
@@ -117,15 +119,15 @@ void Model::tick()
 
 void Model::handleTouchAim(int x, int y)
 {
-    if (gameState != STATE_FLYING && gameState != STATE_CLEARING)
+    if (gameState != GameState::STATE_SHOOTING && gameState != GameState::STATE_WIN)
     {
-        gameState = STATE_AIMING;
+        gameState = GameState::STATE_AIMING;
     }
 }
 
 void Model::handleTouchShoot(int x, int y)
 {
-    if (gameState == STATE_AIMING || gameState == STATE_IDLE)
+    if (gameState == GameState::STATE_AIMING || gameState == GameState::STATE_IDLE)
     {
         // Tinh goc ngam
         float dx = x - BULLET_START_X;
@@ -137,14 +139,14 @@ void Model::handleTouchShoot(int x, int y)
         float length = sqrtf(dx*dx + dy*dy);
         float speed = BULLET_SPEED;
         
-        vx = (dx / length) * speed;
-        vy = (dy / length) * speed;
+        bullet.vx = (dx / length) * speed;
+        bullet.vy = (dy / length) * speed;
         
-        bulletX = BULLET_START_X;
-        bulletY = BULLET_START_Y;
-        bulletVisible = true;
+        bullet.x = BULLET_START_X;
+        bullet.y = BULLET_START_Y;
+        bullet.active = true;
         
-        gameState = STATE_FLYING;
+        gameState = GameState::STATE_SHOOTING;
 
         // Dino nem animation
         dinoState = DINO_THROW;
@@ -154,46 +156,46 @@ void Model::handleTouchShoot(int x, int y)
 
 void Model::updateFlyingPhysics()
 {
-    bulletX += vx;
-    bulletY += vy;
+    bullet.x += bullet.vx;
+    bullet.y += bullet.vy;
     
     // 1. Phan xa tuong (dong bo diem doi voi UI) va chan dinh tuong
-    if (bulletX <= LEFT_WALL && vx < 0) {
-        bulletX = LEFT_WALL + (LEFT_WALL - bulletX);
-        vx = -vx;
+    if (bullet.x <= LEFT_WALL && bullet.vx < 0) {
+        bullet.x = LEFT_WALL + (LEFT_WALL - bullet.x);
+        bullet.vx = -bullet.vx;
     }
-    else if (bulletX >= RIGHT_WALL && vx > 0) {
-        bulletX = RIGHT_WALL - (bulletX - RIGHT_WALL);
-        vx = -vx;
+    else if (bullet.x >= RIGHT_WALL && bullet.vx > 0) {
+        bullet.x = RIGHT_WALL - (bullet.x - RIGHT_WALL);
+        bullet.vx = -bullet.vx;
     }
     
     // 2. Kiem tra va cham (Dung ham phi trang thai da tach)
-    bool collision = isCollisionAt(bulletX, bulletY);
+    bool collision = isCollisionAt(bullet.x, bullet.y);
     
     // 3. Xu ly sau va cham
     if (collision) {
         int snapCol, snapRow;
-        snapToGrid(bulletX, bulletY, snapCol, snapRow);
+        snapToGrid(bullet.x, bullet.y, snapCol, snapRow);
         
         // Snap that bai hoac o da bi chiem -> bo qua, mat luot
         if (snapCol < 0 || snapRow < 0 || grid[getPhysicalIndex(snapRow, snapCol)] != EMPTY_COLOR) {
-            bulletVisible = false;
-            gameState = STATE_IDLE;
-            currentColor = nextColor;
-            nextColor = randomColor();
+            bullet.active = false;
+            gameState = GameState::STATE_IDLE;
+            player.currentEgg = player.nextEgg;
+            player.nextEgg = static_cast<EggColor>(randomColor());
             return;
         }
         
-        grid[getPhysicalIndex(snapRow, snapCol)] = currentColor;
+        grid[getPhysicalIndex(snapRow, snapCol)] = static_cast<uint8_t>(player.currentEgg);
         
-        int oldScore = score;
+        int oldScore = player.score;
         checkMatches(snapCol, snapRow);
         
         // An bullet sau khi gan vao luoi
-        bulletVisible = false;
+        bullet.active = false;
         
         // Neu khong co bong no/roi (score khong doi) thi moi Game Over neu co bong o hang 9
-        if (score == oldScore) {
+        if (player.score == oldScore) {
             bool isGameOver = false;
             for (int c = 0; c < MAX_COLS; c++) {
                 if (grid[getPhysicalIndex(GAME_OVER_ROW, c)] != EMPTY_COLOR) {
@@ -203,13 +205,13 @@ void Model::updateFlyingPhysics()
             }
             
             if (isGameOver) {
-                gameState = STATE_GAME_OVER;
+                gameState = GameState::STATE_LOSE;
                 if (modelListener) modelListener->notifyGameOver();
             } else {
-                if (gameState != STATE_CLEARING) { 
-                    gameState = STATE_IDLE;
-                    currentColor = nextColor;
-                    nextColor = randomColor();
+                if (gameState != GameState::STATE_WIN) { 
+                    gameState = GameState::STATE_IDLE;
+                    player.currentEgg = player.nextEgg;
+                    player.nextEgg = static_cast<EggColor>(randomColor());
                 }
             }
         }
@@ -309,16 +311,16 @@ void Model::checkMatches(int col, int row)
     }
     
     if (matchCount >= GameConstants::MIN_MATCH_COUNT) {
-        gameState = STATE_CLEARING;
+        gameState = GameState::STATE_WIN;
         if (matchCount == 3) {
-            score += GameConstants::SCORE_MATCH_3;
+            player.score += GameConstants::SCORE_MATCH_3;
         } else if (matchCount == 4) {
-            score += GameConstants::SCORE_MATCH_4;
+            player.score += GameConstants::SCORE_MATCH_4;
         } else if (matchCount >= 5) {
-            score += GameConstants::SCORE_MATCH_5;
+            player.score += GameConstants::SCORE_MATCH_5;
         }
-        if (score > highScore) highScore = score;
-        if (modelListener) modelListener->notifyScoreUpdated(score);
+        if (player.score > player.highScore) player.highScore = player.score;
+        if (modelListener) modelListener->notifyScoreUpdated(player.score);
         
         for (int i = 0; i < matchCount; i++) {
             int curr = matchGroup[i];
@@ -369,17 +371,17 @@ void Model::dropFloatingEggs()
     for (int i = 0; i < GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) {
         if (grid[getPhysicalIndex(r, c)] != GameConstants::EMPTY_COLOR && !connected[i]) {
             grid[getPhysicalIndex(r, c)] = GameConstants::EMPTY_COLOR;
-            score += GameConstants::SCORE_DROP_ORPHAN;
+            player.score += GameConstants::SCORE_DROP_ORPHAN;
             dropCount++;
         }
         c++;
         if (c >= MAX_COLS) { c = 0; r++; }
     }
     
-    if (score > highScore) highScore = score;
+    if (player.score > player.highScore) player.highScore = player.score;
     
     if (dropCount > 0) {
-        if (modelListener) modelListener->notifyScoreUpdated(score);
+        if (modelListener) modelListener->notifyScoreUpdated(player.score);
     }
 }
 
@@ -462,7 +464,7 @@ void Model::shiftGridDown() {
     // Neu co trung o hang Game Over, bao ket thuc
     for (int c = 0; c < GameConstants::MAX_COLS; c++) {
         if (grid[getPhysicalIndex(GameConstants::GAME_OVER_ROW, c)] != GameConstants::EMPTY_COLOR) {
-            gameState = STATE_GAME_OVER;
+            gameState = GameState::STATE_LOSE;
             if (modelListener) modelListener->notifyGameOver();
             return;
         }

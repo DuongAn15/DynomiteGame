@@ -9,10 +9,40 @@
 enum GameState {
     STATE_IDLE,
     STATE_AIMING,
-    STATE_FLYING,
-    STATE_CLEARING,
-    STATE_GAME_OVER,
-    STATE_PAUSE
+    STATE_SHOOTING,
+    STATE_WIN,
+    STATE_LOSE,
+    STATE_PAUSE,
+
+    // Legacy aliases for Presenter/View compatibility
+    STATE_FLYING = STATE_SHOOTING,
+    STATE_CLEARING = STATE_WIN,
+    STATE_GAME_OVER = STATE_LOSE
+};
+
+enum class EggColor : uint8_t {
+    EMPTY_COLOR = 0,
+    RED = 1,
+    BLUE = 2,
+    GREEN = 3,
+    YELLOW = 4,
+    PURPLE = 5
+};
+
+struct BulletData {
+    float x;
+    float y;
+    float vx;
+    float vy;
+    bool active;
+};
+
+struct PlayerData {
+    float aimAngle;
+    EggColor currentEgg;
+    EggColor nextEgg;
+    int score;
+    int highScore;
 };
 
 enum DinoState {
@@ -42,13 +72,13 @@ public:
     // Bắt đầu game mới
     void startNewGame();
     void pauseGame() { 
-        if (gameState != STATE_PAUSE) {
+        if (gameState != GameState::STATE_PAUSE) {
             prePauseState = gameState;
-            gameState = STATE_PAUSE;
+            gameState = GameState::STATE_PAUSE;
         }
     }
     void resumeGame() { 
-        if (gameState == STATE_PAUSE) {
+        if (gameState == GameState::STATE_PAUSE) {
             gameState = prePauseState;
         }
     }
@@ -61,14 +91,14 @@ public:
         return r * GameConstants::MAX_COLS + col;
     }
     uint8_t getGridCell(int row, int col) const { return grid[getPhysicalIndex(row, col)]; }
-    float getBulletX() const { return bulletX; }
-    float getBulletY() const { return bulletY; }
-    int getCurrentColor() const { return currentColor; }
-    int getNextColor() const { return nextColor; }
-    int getScore() const { return score; }
-    int getHighScore() const { return highScore; }
+    float getBulletX() const { return bullet.x; }
+    float getBulletY() const { return bullet.y; }
+    int getCurrentColor() const { return static_cast<int>(player.currentEgg); }
+    int getNextColor() const { return static_cast<int>(player.nextEgg); }
+    int getScore() const { return player.score; }
+    int getHighScore() const { return player.highScore; }
     DinoState getDinoState() const { return dinoState; }
-    bool isBulletVisible() const { return bulletVisible; }
+    bool isBulletVisible() const { return bullet.active; }
     float getGlobalOffsetY() const { return globalOffsetY; }
     int getGridParityOffset() const { return gridParityOffset; }
     
@@ -86,16 +116,8 @@ private:
     GameState prePauseState;
     
     // Tọa độ quả trứng đang bay (float để nội suy mượt mà qua FPU)
-    float bulletX;
-    float bulletY;
-    float vx;
-    float vy;
-
-    int currentColor;
-    int nextColor;
-    int score;
-    int highScore;
-    bool bulletVisible;
+    BulletData bullet;
+    PlayerData player;
 
     // Dino animation
     DinoState dinoState;

@@ -5,8 +5,8 @@
 
 namespace GameConstants {
     // Grid & Matrix
-    constexpr int MAX_ROWS = 10;
-    constexpr int MAX_COLS = 9;
+    constexpr int MAX_ROWS = 12;
+    constexpr int MAX_COLS = 11;
     
     // UI Layout & Grid
     constexpr int EGG_GRID_WIDTH = 228;
@@ -116,7 +116,8 @@ namespace GameConstants {
         GRID_START_Y + 2 * CELL_HEIGHT, GRID_START_Y + 3 * CELL_HEIGHT,
         GRID_START_Y + 4 * CELL_HEIGHT, GRID_START_Y + 5 * CELL_HEIGHT,
         GRID_START_Y + 6 * CELL_HEIGHT, GRID_START_Y + 7 * CELL_HEIGHT,
-        GRID_START_Y + 8 * CELL_HEIGHT, GRID_START_Y + 9 * CELL_HEIGHT
+        GRID_START_Y + 8 * CELL_HEIGHT, GRID_START_Y + 9 * CELL_HEIGHT,
+        GRID_START_Y + 10 * CELL_HEIGHT, GRID_START_Y + 11 * CELL_HEIGHT
     };
 
     constexpr float MODEL_CELL_X_EVEN[MAX_COLS] = {
@@ -124,7 +125,8 @@ namespace GameConstants {
         GRID_START_X + 2 * CELL_WIDTH, GRID_START_X + 3 * CELL_WIDTH,
         GRID_START_X + 4 * CELL_WIDTH, GRID_START_X + 5 * CELL_WIDTH,
         GRID_START_X + 6 * CELL_WIDTH, GRID_START_X + 7 * CELL_WIDTH,
-        GRID_START_X + 8 * CELL_WIDTH
+        GRID_START_X + 8 * CELL_WIDTH, GRID_START_X + 9 * CELL_WIDTH,
+        GRID_START_X + 10 * CELL_WIDTH
     };
 
     constexpr float MODEL_CELL_X_ODD[MAX_COLS] = {
@@ -132,7 +134,8 @@ namespace GameConstants {
         GRID_START_X + 2 * CELL_WIDTH + (CELL_WIDTH / 2.0f), GRID_START_X + 3 * CELL_WIDTH + (CELL_WIDTH / 2.0f),
         GRID_START_X + 4 * CELL_WIDTH + (CELL_WIDTH / 2.0f), GRID_START_X + 5 * CELL_WIDTH + (CELL_WIDTH / 2.0f),
         GRID_START_X + 6 * CELL_WIDTH + (CELL_WIDTH / 2.0f), GRID_START_X + 7 * CELL_WIDTH + (CELL_WIDTH / 2.0f),
-        GRID_START_X + 8 * CELL_WIDTH + (CELL_WIDTH / 2.0f)
+        GRID_START_X + 8 * CELL_WIDTH + (CELL_WIDTH / 2.0f), GRID_START_X + 9 * CELL_WIDTH + (CELL_WIDTH / 2.0f),
+        GRID_START_X + 10 * CELL_WIDTH + (CELL_WIDTH / 2.0f)
     };
 
     constexpr int UI_CELL_Y[MAX_ROWS] = {
@@ -140,7 +143,8 @@ namespace GameConstants {
         2 * UI_CELL_HEIGHT, 3 * UI_CELL_HEIGHT,
         4 * UI_CELL_HEIGHT, 5 * UI_CELL_HEIGHT,
         6 * UI_CELL_HEIGHT, 7 * UI_CELL_HEIGHT,
-        8 * UI_CELL_HEIGHT, 9 * UI_CELL_HEIGHT
+        8 * UI_CELL_HEIGHT, 9 * UI_CELL_HEIGHT,
+        10 * UI_CELL_HEIGHT, 11 * UI_CELL_HEIGHT
     };
 
     constexpr int UI_CELL_X_EVEN[MAX_COLS] = {
@@ -148,7 +152,8 @@ namespace GameConstants {
         2 * UI_CELL_WIDTH, 3 * UI_CELL_WIDTH,
         4 * UI_CELL_WIDTH, 5 * UI_CELL_WIDTH,
         6 * UI_CELL_WIDTH, 7 * UI_CELL_WIDTH,
-        8 * UI_CELL_WIDTH
+        8 * UI_CELL_WIDTH, 9 * UI_CELL_WIDTH,
+        10 * UI_CELL_WIDTH
     };
 
     constexpr int UI_CELL_X_ODD[MAX_COLS] = {
@@ -156,7 +161,8 @@ namespace GameConstants {
         2 * UI_CELL_WIDTH + UI_CELL_OFFSET_X, 3 * UI_CELL_WIDTH + UI_CELL_OFFSET_X,
         4 * UI_CELL_WIDTH + UI_CELL_OFFSET_X, 5 * UI_CELL_WIDTH + UI_CELL_OFFSET_X,
         6 * UI_CELL_WIDTH + UI_CELL_OFFSET_X, 7 * UI_CELL_WIDTH + UI_CELL_OFFSET_X,
-        8 * UI_CELL_WIDTH + UI_CELL_OFFSET_X
+        8 * UI_CELL_WIDTH + UI_CELL_OFFSET_X, 9 * UI_CELL_WIDTH + UI_CELL_OFFSET_X,
+        10 * UI_CELL_WIDTH + UI_CELL_OFFSET_X
     };
 }
 

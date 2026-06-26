@@ -6,7 +6,7 @@
 void test_floating_eggs() {
     Model m;
     for(int i=0; i<GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) m.grid[i] = GameConstants::EMPTY_COLOR;
-    m.score = 0;
+    m.player.score = 0;
 
     // Hàng 0 có trứng (nối trần)
     m.grid[0 * GameConstants::MAX_COLS + 2] = GameConstants::COLOR_RED;
@@ -29,7 +29,7 @@ void test_floating_eggs() {
     ASSERT(m.grid[5 * GameConstants::MAX_COLS + 4] == GameConstants::EMPTY_COLOR);
 
     // Điểm rụng 2 quả: SCORE_DROP_ORPHAN * 2 = 2
-    ASSERT(m.score == GameConstants::SCORE_DROP_ORPHAN * 2);
+    ASSERT(m.player.score == GameConstants::SCORE_DROP_ORPHAN * 2);
 }
 
 void run_FloatingEggs_Tests() {

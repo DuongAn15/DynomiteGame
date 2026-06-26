@@ -9,9 +9,9 @@ void test_wallReflection() {
     Model m;
     
     // Left Wall
-    m.bulletX = GameConstants::LEFT_WALL; 
+    m.bullet.x = GameConstants::LEFT_WALL; 
     m.bulletY = 100.0f;
-    m.vx = -5.0f; // Moving left, hitting wall
+    m.bullet.vx = -5.0f; // Moving left, hitting wall
     
     m.updateFlyingPhysics();
     // After logic: bulletX += vx -> 8 - 5 = 3
@@ -20,8 +20,8 @@ void test_wallReflection() {
     ASSERT(fabs(m.vx - 5.0f) < 0.001f);
     
     // Right Wall (208.0f)
-    m.bulletX = GameConstants::RIGHT_WALL;
-    m.vx = 5.0f;
+    m.bullet.x = GameConstants::RIGHT_WALL;
+    m.bullet.vx = 5.0f;
     m.updateFlyingPhysics();
     // 208 + 5 = 213. 213 >= 208, vx > 0 -> 208 - (213 - 208) = 203. vx = -5
     ASSERT(fabs(m.bulletX - 203.0f) < 0.001f);

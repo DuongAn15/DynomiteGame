@@ -6,10 +6,10 @@
 
 void test_raycast() {
     Model m;
-    for(int i=0; i<GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) m.grid[i] = GameConstants::EMPTY_COLOR;
+    for(int i=0; i < GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) m.grid[i] = GameConstants::EMPTY_COLOR;
     
     // Đặt 1 quả trứng làm chắn đường
-    m.grid[2 * GameConstants::MAX_COLS + 4] = GameConstants::COLOR_RED; // Tọa độ khoảng x=108, y=76
+    m.grid[HexGrid::index(2, 4)] = GameConstants::COLOR_RED; // Tọa độ khoảng x=108, y=76
 
     // Giả lập bắn đạn từ (108, 243) thẳng lên trên
     float simX = 108.0f;

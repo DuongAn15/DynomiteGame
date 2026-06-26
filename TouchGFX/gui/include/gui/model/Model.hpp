@@ -5,6 +5,7 @@
 
 
 #include <gui/common/GameConstants.hpp>
+#include <gui/common/HexGrid.hpp>
 
 enum GameState {
     STATE_IDLE,
@@ -88,7 +89,7 @@ public:
     inline int getPhysicalIndex(int logicalRow, int col) const {
         int r = headRowIndex + logicalRow;
         if (r >= GameConstants::MAX_ROWS) r -= GameConstants::MAX_ROWS;
-        return r * GameConstants::MAX_COLS + col;
+        return HexGrid::index(r, col);
     }
     uint8_t getGridCell(int row, int col) const { return grid[getPhysicalIndex(row, col)]; }
     float getBulletX() const { return bullet.x; }
@@ -151,9 +152,6 @@ private:
     int matchGroup[GameConstants::MAX_ROWS * GameConstants::MAX_COLS];
     
     // Helper tọa độ & tiện ích DRY
-    void getCellCenter(int col, int row, float &px, float &py) const;
-    void getApproxCell(float x, float y, int &col, int &row) const;
-    bool isValidCell(int row, int col) const;
     float calculateDistanceSq(float x1, float y1, float x2, float y2) const;
 
     // Random

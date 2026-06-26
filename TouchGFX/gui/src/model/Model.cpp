@@ -29,7 +29,7 @@ void Model::startNewGame()
     
     gridParityOffset = 0;
     for(int row = 0; row < INITIAL_ROWS; row++) {
-        int maxCol = ((row + gridParityOffset) & 1) ? (MAX_COLS - 1) : MAX_COLS;
+        int maxCol = HexGrid::isEvenRow(row, gridParityOffset) ? MAX_COLS : (MAX_COLS - 1);
         for(int col = 0; col < maxCol; col++) {
             grid[getPhysicalIndex(row, col)] = randomColor();
         }
@@ -224,7 +224,7 @@ void Model::snapToGrid(float px, float py, int &outCol, int &outRow)
     int bestC = 0, bestR = 0;
     
     int approxRow, approxCol;
-    getApproxCell(px, py, approxCol, approxRow);
+    HexGrid::pixelToNearestCell(px, py - globalOffsetY, gridParityOffset, approxRow, approxCol);
     
     int startR = approxRow - COLLISION_SCAN_RADIUS;
     if (startR < 0) startR = 0;
@@ -237,16 +237,17 @@ void Model::snapToGrid(float px, float py, int &outCol, int &outRow)
     
     for (int r = startR; r <= endR; r++) {
         for (int c = startC; c <= endC; c++) {
-            if (isValidCell(r, c) && grid[getPhysicalIndex(r, c)] == EMPTY_COLOR) {
+            if (HexGrid::isValidCell(r, c, HexGrid::isEvenRow(r, gridParityOffset)) && grid[getPhysicalIndex(r, c)] == EMPTY_COLOR) {
                 bool canAttach = false;
                 if (r == 0) {
                     canAttach = true;
                 } else {
                     for (int i = 0; i < HEX_NEIGHBORS_COUNT; i++) {
-                        int parity = (r + gridParityOffset) & 1;
-                        int nr = r + NEIGHBOR_OFFSETS[parity][i][1];
-                        int nc = c + NEIGHBOR_OFFSETS[parity][i][0];
-                        if (isValidCell(nr, nc) && grid[getPhysicalIndex(nr, nc)] != EMPTY_COLOR) {
+                        bool isEven = HexGrid::isEvenRow(r, gridParityOffset);
+                        const NeighborOffset* neighbors = HexGrid::getNeighbors(isEven);
+                        int nr = r + neighbors[i].dy;
+                        int nc = c + neighbors[i].dx;
+                        if (HexGrid::isValidCell(nr, nc, HexGrid::isEvenRow(nr, gridParityOffset)) && grid[getPhysicalIndex(nr, nc)] != EMPTY_COLOR) {
                             canAttach = true;
                             break;
                         }
@@ -254,8 +255,9 @@ void Model::snapToGrid(float px, float py, int &outCol, int &outRow)
                 }
                 
                 if (canAttach) {
-                    float cx, cy;
-                    getCellCenter(c, r, cx, cy);
+                    bool isEven = HexGrid::isEvenRow(r, gridParityOffset);
+                    float cx = HexGrid::cellToPixelX(c, isEven);
+                    float cy = HexGrid::cellToPixelY(r) + globalOffsetY;
                     float distSq = calculateDistanceSq(px, py, cx, cy);
                     if (distSq < minDistSq) {
                         minDistSq = distSq;
@@ -286,7 +288,7 @@ void Model::checkMatches(int col, int row)
     int matchCount = 0;
     
     algoQueueStack[qTail++] = (row << 8) | col;
-    visited[row * MAX_COLS + col] = true;
+    visited[HexGrid::index(row, col)] = true;
     
     while (qHead < qTail) {
         int curr = algoQueueStack[qHead++];
@@ -296,12 +298,13 @@ void Model::checkMatches(int col, int row)
         int c = curr & 0xFF;
         
         for (int i = 0; i < HEX_NEIGHBORS_COUNT; i++) {
-            int parity = (r + gridParityOffset) & 1;
-            int nr = r + NEIGHBOR_OFFSETS[parity][i][1];
-            int nc = c + NEIGHBOR_OFFSETS[parity][i][0];
+            bool isEven = HexGrid::isEvenRow(r, gridParityOffset);
+            const NeighborOffset* neighbors = HexGrid::getNeighbors(isEven);
+            int nr = r + neighbors[i].dy;
+            int nc = c + neighbors[i].dx;
             
-            if (isValidCell(nr, nc)) {
-                int nIdx = nr * MAX_COLS + nc;
+            if (HexGrid::isValidCell(nr, nc, HexGrid::isEvenRow(nr, gridParityOffset))) {
+                int nIdx = HexGrid::index(nr, nc);
                 if (!visited[nIdx] && grid[getPhysicalIndex(nr, nc)] == targetColor) {
                     visited[nIdx] = true;
                     algoQueueStack[qTail++] = (nr << 8) | nc;
@@ -342,7 +345,7 @@ void Model::dropFloatingEggs()
     for (int c = 0; c < MAX_COLS; c++) {
         if (grid[getPhysicalIndex(0, c)] != EMPTY_COLOR) {
             algoQueueStack[top++] = (0 << 8) | c;
-            connected[0 * MAX_COLS + c] = true;
+            connected[HexGrid::index(0, c)] = true;
         }
     }
     
@@ -352,12 +355,13 @@ void Model::dropFloatingEggs()
         int c = curr & 0xFF;
         
         for (int i = 0; i < HEX_NEIGHBORS_COUNT; i++) {
-            int parity = (r + gridParityOffset) & 1;
-            int nr = r + NEIGHBOR_OFFSETS[parity][i][1];
-            int nc = c + NEIGHBOR_OFFSETS[parity][i][0];
+            bool isEven = HexGrid::isEvenRow(r, gridParityOffset);
+            const NeighborOffset* neighbors = HexGrid::getNeighbors(isEven);
+            int nr = r + neighbors[i].dy;
+            int nc = c + neighbors[i].dx;
             
-            if (isValidCell(nr, nc)) {
-                int nIdx = nr * MAX_COLS + nc;
+            if (HexGrid::isValidCell(nr, nc, HexGrid::isEvenRow(nr, gridParityOffset))) {
+                int nIdx = HexGrid::index(nr, nc);
                 if (!connected[nIdx] && grid[getPhysicalIndex(nr, nc)] != EMPTY_COLOR) {
                     connected[nIdx] = true;
                     algoQueueStack[top++] = (nr << 8) | nc;
@@ -385,28 +389,9 @@ void Model::dropFloatingEggs()
     }
 }
 
-void Model::getCellCenter(int col, int row, float &px, float &py) const
-{
-    px = ((row + gridParityOffset) & 1) == 0 ? MODEL_CELL_X_EVEN[col] : MODEL_CELL_X_ODD[col];
-    py = MODEL_CELL_Y[row] + globalOffsetY;
-}
-
 float Model::calculateDistanceSq(float x1, float y1, float x2, float y2) const
 {
     return (x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1);
-}
-
-void Model::getApproxCell(float x, float y, int &col, int &row) const
-{
-    row = (int)roundf((y - GameConstants::GRID_START_Y - globalOffsetY) / GameConstants::CELL_HEIGHT);
-    col = (int)roundf((x - GameConstants::GRID_START_X) / GameConstants::CELL_WIDTH);
-}
-
-bool Model::isValidCell(int row, int col) const
-{
-    if (row < 0 || row >= MAX_ROWS || col < 0) return false;
-    int maxC = ((row + gridParityOffset) & 1) ? (MAX_COLS - 1) : MAX_COLS;
-    return col < maxC;
 }
 
 bool Model::isCollisionAt(float x, float y) const
@@ -416,7 +401,7 @@ bool Model::isCollisionAt(float x, float y) const
     }
     
     int approxRow, approxCol;
-    getApproxCell(x, y, approxCol, approxRow);
+    HexGrid::pixelToNearestCell(x, y - globalOffsetY, gridParityOffset, approxRow, approxCol);
     
     int startR = approxRow - COLLISION_SCAN_RADIUS;
     if (startR < 0) startR = 0;
@@ -431,9 +416,10 @@ bool Model::isCollisionAt(float x, float y) const
 
     for (int r = startR; r <= endR; r++) {
         for (int c = startC; c <= endC; c++) {
-            if (isValidCell(r, c) && grid[getPhysicalIndex(r, c)] != EMPTY_COLOR) {
-                float px = ((r + gridParityOffset) & 1) == 0 ? MODEL_CELL_X_EVEN[c] : MODEL_CELL_X_ODD[c];
-                float py = MODEL_CELL_Y[r] + globalOffsetY;
+            if (HexGrid::isValidCell(r, c, HexGrid::isEvenRow(r, gridParityOffset)) && grid[getPhysicalIndex(r, c)] != EMPTY_COLOR) {
+                bool isEven = HexGrid::isEvenRow(r, gridParityOffset);
+                float px = HexGrid::cellToPixelX(c, isEven);
+                float py = HexGrid::cellToPixelY(r) + globalOffsetY;
                 
                 float dx = px - x;
                 float dy = py - y;
@@ -477,7 +463,7 @@ void Model::shiftGridDown() {
     gridParityOffset = (gridParityOffset + 1) & 1;
     
     // Random hang 0 moi (100% ra bong, khong ra rong de chong ket starvation)
-    int maxC = (gridParityOffset & 1) ? (GameConstants::MAX_COLS - 1) : GameConstants::MAX_COLS;
+    int maxC = HexGrid::isEvenRow(0, gridParityOffset) ? GameConstants::MAX_COLS : (GameConstants::MAX_COLS - 1);
     for (int c = 0; c < GameConstants::MAX_COLS; c++) {
         if (c < maxC) {
             grid[getPhysicalIndex(0, c)] = randomColor();

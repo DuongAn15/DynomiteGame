@@ -5,15 +5,15 @@
 
 void test_game_over() {
     Model m;
-    for(int i=0; i<GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) m.grid[i] = GameConstants::EMPTY_COLOR;
+    for(int i=0; i < GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) m.grid[i] = GameConstants::EMPTY_COLOR;
     
     m.gameState = STATE_FLYING;
     m.player.score = 0;
     m.player.currentEgg = GameConstants::COLOR_BLUE;
 
     // Đặt 2 quả trứng làm chướng ngại vật ở hàng 7 (lẻ, so le)
-    m.grid[7 * GameConstants::MAX_COLS + 2] = GameConstants::COLOR_RED;
-    m.grid[7 * GameConstants::MAX_COLS + 3] = GameConstants::COLOR_RED;
+    m.grid[HexGrid::index(7, 2)] = GameConstants::COLOR_RED;
+    m.grid[HexGrid::index(7, 3)] = GameConstants::COLOR_RED;
     
     // Bắn từ dưới lên thẳng vào hàng 8 cột 3 (chẵn, tọa độ px = 84, py = 244)
     m.bullet.x = 84.0f;
@@ -27,20 +27,20 @@ void test_game_over() {
         if (m.gameState != STATE_FLYING) break;
     }
 
-    ASSERT(m.grid[8 * GameConstants::MAX_COLS + 3] == GameConstants::COLOR_BLUE);
+    ASSERT(m.grid[HexGrid::index(8, 3)] == GameConstants::COLOR_BLUE);
     ASSERT(m.gameState == STATE_GAME_OVER);
 }
 
 void test_no_game_over_if_match() {
     Model m;
-    for(int i=0; i<GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) m.grid[i] = GameConstants::EMPTY_COLOR;
+    for(int i=0; i < GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) m.grid[i] = GameConstants::EMPTY_COLOR;
     
     m.gameState = STATE_FLYING;
     m.player.score = 0;
     m.player.currentEgg = GameConstants::COLOR_RED;
 
-    m.grid[7 * GameConstants::MAX_COLS + 2] = GameConstants::COLOR_RED;
-    m.grid[7 * GameConstants::MAX_COLS + 3] = GameConstants::COLOR_RED;
+    m.grid[HexGrid::index(7, 2)] = GameConstants::COLOR_RED;
+    m.grid[HexGrid::index(7, 3)] = GameConstants::COLOR_RED;
     
     m.bullet.x = 84.0f; 
     m.bulletY = 244.0f; 

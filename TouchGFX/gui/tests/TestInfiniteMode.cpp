@@ -11,16 +11,16 @@ void test_shift_grid() {
     MockModelListener mock;
     m.bind(&mock);
 
-    for(int i=0; i<GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) m.grid[i] = GameConstants::EMPTY_COLOR;
+    for(int i=0; i < GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) m.grid[i] = GameConstants::EMPTY_COLOR;
     
     m.gridParityOffset = 0;
-    m.grid[2 * GameConstants::MAX_COLS + 3] = GameConstants::COLOR_RED;
+    m.grid[HexGrid::index(2, 3)] = GameConstants::COLOR_RED;
     
     m.shiftGridDown();
     
     ASSERT(m.gridParityOffset == 1);
-    ASSERT(m.grid[3 * GameConstants::MAX_COLS + 3] == GameConstants::COLOR_RED);
-    ASSERT(m.grid[2 * GameConstants::MAX_COLS + 3] == GameConstants::EMPTY_COLOR);
+    ASSERT(m.grid[HexGrid::index(3, 3)] == GameConstants::COLOR_RED);
+    ASSERT(m.grid[HexGrid::index(2, 3)] == GameConstants::EMPTY_COLOR);
     
     // Kiểm tra Integration báo UI
     ASSERT(mock.isGridShiftedCalled == true);
@@ -31,7 +31,7 @@ void test_survival_game_over() {
     MockModelListener mock;
     m.bind(&mock);
 
-    for(int i=0; i<GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) m.grid[i] = GameConstants::EMPTY_COLOR;
+    for(int i=0; i < GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) m.grid[i] = GameConstants::EMPTY_COLOR;
     
     m.gameState = STATE_IDLE;
     m.grid[GameConstants::GAME_OVER_ROW * GameConstants::MAX_COLS + 1] = GameConstants::COLOR_RED;
@@ -88,8 +88,8 @@ void test_hitbox_with_offset() {
     m.gameState = STATE_IDLE;
     m.globalOffsetY = 14.0f; // Trôi 1 nửa ô
     
-    for(int i=0; i<GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) m.grid[i] = GameConstants::EMPTY_COLOR;
-    m.grid[0 * GameConstants::MAX_COLS + 0] = GameConstants::COLOR_RED; // Ô góc trên cùng bên trái
+    for(int i=0; i < GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) m.grid[i] = GameConstants::EMPTY_COLOR;
+    m.grid[HexGrid::index(0, 0)] = GameConstants::COLOR_RED; // Ô góc trên cùng bên trái
     
     // Tọa độ tâm ô [0,0] lúc bình thường: X = GRID_START_X, Y = GRID_START_Y
     // Do globalOffsetY = 14.0f, nên Y của nó là GRID_START_Y + 14.0f
@@ -115,8 +115,8 @@ void test_integration_rng_stress() {
         // Kiểm tra hàng 0 không được có bóng rỗng (trừ những ô thuộc parity thừa)
         int maxC = ((0 + m.gridParityOffset) % 2 != 0) ? (GameConstants::MAX_COLS - 1) : GameConstants::MAX_COLS;
         for (int c = 0; c < maxC; c++) {
-            ASSERT(m.grid[0 * GameConstants::MAX_COLS + c] != GameConstants::EMPTY_COLOR);
-            ASSERT(m.grid[0 * GameConstants::MAX_COLS + c] >= 1 && m.grid[0 * GameConstants::MAX_COLS + c] <= GameConstants::NUM_COLORS);
+            ASSERT(m.grid[HexGrid::index(0, c)] != GameConstants::EMPTY_COLOR);
+            ASSERT(m.grid[HexGrid::index(0, c)] >= 1 && m.grid[HexGrid::index(0, c)] <= GameConstants::NUM_COLORS);
         }
     }
 }

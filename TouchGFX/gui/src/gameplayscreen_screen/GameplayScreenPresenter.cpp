@@ -120,3 +120,8 @@ void GameplayScreenPresenter::notifyGridShifted()
 {
     view.updateFullGridUI();
 }
+
+void GameplayScreenPresenter::handleSwapColor()
+{
+    model->swapColor();
+}

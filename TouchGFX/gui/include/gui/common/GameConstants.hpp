@@ -7,8 +7,10 @@ namespace GameConstants {
     // Grid & Matrix
     constexpr int MAX_ROWS = 10;
     constexpr int MAX_COLS = 9;
+    constexpr int MAX_CELLS = MAX_ROWS * MAX_COLS;
     
     // UI Layout & Grid
+    constexpr int SCREEN_WIDTH = 240;
     constexpr int EGG_GRID_WIDTH = 228;
     constexpr float CELL_WIDTH = 24.0f;
     constexpr float CELL_HEIGHT = 28.0f;
@@ -42,8 +44,10 @@ namespace GameConstants {
     // Physics & Aiming
     constexpr float AIM_SMOOTH_FACTOR = 0.3f;
     constexpr float AIM_MIN_DY = -10.0f;
+    constexpr float AIM_START_Y_OFFSET = 50.0f;
     
     constexpr int TRAJECTORY_DOTS_COUNT = 15;
+    constexpr int TRAJECTORY_MAX_STEPS = 300;
     constexpr int16_t TRAJECTORY_DOT_SIZE = 4;
     constexpr int16_t TRAJECTORY_DOT_OFFSET = 2;
     constexpr float TRAJECTORY_DOT_START_DIST = 30.0f;
@@ -74,6 +78,8 @@ namespace GameConstants {
 
     // Game Logic
     constexpr uint32_t RNG_INITIAL_SEED = 12345;
+    constexpr int MAX_SPAWN_LUT_INDEX = 31;
+    constexpr int CLEARING_FRAMES_DELAY = 30;
     constexpr int SPAWN_INTERVAL_START = 1556;
     constexpr int SPAWN_INTERVAL_LUT[32] = {
         1556,1556,1556,1556,1556,1556,1556,1556,1556,1556,

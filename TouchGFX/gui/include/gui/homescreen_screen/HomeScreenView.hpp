@@ -11,7 +11,10 @@ public:
     virtual ~HomeScreenView() {}
     virtual void setupScreen();
     virtual void tearDownScreen();
+    virtual void handleTickEvent();
 protected:
+private:
+    bool prevShoot;
 };
 
 #endif // HOMESCREENVIEW_HPP

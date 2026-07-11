@@ -89,17 +89,18 @@ void GameplayScreenView::updateFullGridUI()
 
 uint16_t GameplayScreenView::getColorBitmap(int color)
 {
-    switch (color)
-    {
-        case COLOR_BLUE: return BITMAP_EGG_BLUE_ID;
-        case COLOR_GREEN: return BITMAP_EGG_GREEN_ID;
-        case COLOR_ORANGE: return BITMAP_EGG_ORANGE_ID;
-        case COLOR_PINK: return BITMAP_EGG_PINK_ID;
-        case COLOR_PURPLE: return BITMAP_EGG_PURPLE_ID;
-        case COLOR_RED: return BITMAP_EGG_RED_ID;
-        case COLOR_YELLOW: return BITMAP_EGG_YELLOW_ID;
-        default: return BITMAP_EGG_BLUE_ID;
-    }
+    static const uint16_t colorBmpLut[] = {
+        BITMAP_EGG_BLUE_ID, // 0 (empty)
+        BITMAP_EGG_BLUE_ID, // 1
+        BITMAP_EGG_GREEN_ID,
+        BITMAP_EGG_ORANGE_ID,
+        BITMAP_EGG_PINK_ID,
+        BITMAP_EGG_PURPLE_ID,
+        BITMAP_EGG_RED_ID,
+        BITMAP_EGG_YELLOW_ID
+    };
+    if (color >= 1 && color <= 7) return colorBmpLut[color];
+    return BITMAP_EGG_BLUE_ID;
 }
 
 void GameplayScreenView::handleClickEvent(const touchgfx::ClickEvent& evt)
@@ -364,11 +365,14 @@ void GameplayScreenView::updateGrid()
         eggGrid.invalidate();
     }
 
+    uint8_t localBuffer[GameConstants::MAX_ROWS * GameConstants::MAX_COLS];
+    presenter->getGridData(localBuffer);
+
     for (int row = 0; row < MAX_ROWS; row++)
     {
         for (int col = 0; col < MAX_COLS; col++)
         {
-            uint8_t color = presenter->getGridCell(row, col);
+            uint8_t color = localBuffer[row * GameConstants::MAX_COLS + col];
             if (color != shadowGrid[row][col])
             {
                 // Invalidate trạng thái cũ trước khi thay đổi (nếu có)

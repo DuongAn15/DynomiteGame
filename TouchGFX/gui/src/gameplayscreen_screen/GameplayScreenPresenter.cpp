@@ -98,6 +98,11 @@ int GameplayScreenPresenter::getGridParityOffset() const
     return model->getGridParityOffset();
 }
 
+void GameplayScreenPresenter::getGridData(uint8_t* out) const
+{
+    model->getGridData(out);
+}
+
 void GameplayScreenPresenter::notifyGameOver()
 {
     // Báo cho UI chuyển sang màn hình GameOver (nếu có)

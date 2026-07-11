@@ -30,7 +30,7 @@ namespace GameConstants {
     constexpr float EGG_HEIGHT = 32.0f;
     constexpr float BULLET_START_X = 120.0f;
     constexpr float BULLET_START_Y = 243.0f;
-    constexpr float BULLET_SPEED = 5.0f;
+    constexpr float BULLET_SPEED = 9.0f;
 
     // Bounds & Walls
     constexpr float LEFT_WALL = 8.0f;
@@ -38,8 +38,8 @@ namespace GameConstants {
     constexpr float TOP_WALL = 16.0f;
     
     // Animations & Timing
-    constexpr int DINO_THROW_FRAMES = 15;
-    constexpr int DINO_DONE_FRAMES = 10;
+    constexpr int DINO_THROW_FRAMES = 8;
+    constexpr int DINO_DONE_FRAMES = 6;
     
     // Physics & Aiming
     constexpr float AIM_SMOOTH_FACTOR = 0.3f;
@@ -47,7 +47,7 @@ namespace GameConstants {
     constexpr float AIM_START_Y_OFFSET = 50.0f;
     
     constexpr int TRAJECTORY_DOTS_COUNT = 15;
-    constexpr int TRAJECTORY_MAX_STEPS = 1000;
+    constexpr int TRAJECTORY_MAX_STEPS = 300;
     constexpr int16_t TRAJECTORY_DOT_SIZE = 4;
     constexpr int16_t TRAJECTORY_DOT_OFFSET = 2;
     constexpr float TRAJECTORY_DOT_START_DIST = 30.0f;
@@ -80,25 +80,25 @@ namespace GameConstants {
     constexpr uint32_t RNG_INITIAL_SEED = 12345;
     constexpr int MAX_SPAWN_LUT_INDEX = 31;
     constexpr int CLEARING_FRAMES_DELAY = 30;
-    constexpr int SPAWN_INTERVAL_START = 2800;
+    constexpr int SPAWN_INTERVAL_START = 1556;
     constexpr int SPAWN_INTERVAL_LUT[32] = {
-        2800,2800,2800,2800,2800,2800,2800,2800,2800,2800,
-        2600,2600,2600,2600,2600,2600,2600,2600,
-        2400,2400,2400,2400,2400,2400,
-        2200,2200,2200,2200,
-        2000,2000,2000,2000
+        1556,1556,1556,1556,1556,1556,1556,1556,1556,1556,
+        1444,1444,1444,1444,1444,1444,1444,1444,
+        1333,1333,1333,1333,1333,1333,
+        1222,1222,1222,1222,
+        1111,1111,1111,1111
     };
     constexpr uint32_t RNG_MULTIPLIER = 1664525;
     constexpr uint32_t RNG_INCREMENT = 1013904223;
     constexpr int INITIAL_ROWS = 3;
     constexpr int GAME_OVER_ROW = 9;
     constexpr int MIN_BALLS_THRESHOLD = 12;
-    constexpr float DROP_SPEED_START = 0.015f; // Pixels per frame
-    constexpr float DROP_SPEED_INCREMENT = 0.01f;
-    constexpr float DROP_SPEED_MAX = 0.15f;
+    constexpr float DROP_SPEED_START = 0.027f; // Pixels per frame
+    constexpr float DROP_SPEED_INCREMENT = 0.018f;
+    constexpr float DROP_SPEED_MAX = 0.27f;
     
     constexpr int HEX_NEIGHBORS_COUNT = 6;
-    constexpr int COLLISION_SCAN_RADIUS = 2;
+    constexpr int COLLISION_SCAN_RADIUS = 1;
     constexpr float MAX_DIST_SQ_INIT = 999999.0f;
     constexpr int MIN_MATCH_COUNT = 3;
 

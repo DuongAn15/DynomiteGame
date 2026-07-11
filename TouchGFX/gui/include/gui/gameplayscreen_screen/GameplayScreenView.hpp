@@ -42,6 +42,8 @@ private:
     float smoothedAimX;
     float smoothedAimY;
     bool isAiming;
+    bool prevSwap;
+    bool prevShoot;
 
     uint16_t getColorBitmap(int color);
 

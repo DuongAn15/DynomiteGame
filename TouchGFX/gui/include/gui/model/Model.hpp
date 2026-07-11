@@ -38,6 +38,7 @@ public:
     // Nhận sự kiện chạm từ View (tạm thời thay thế nút cứng)
     void handleTouchAim(int x, int y);
     void handleTouchShoot(int x, int y);
+    void swapColor();
 
     // Bắt đầu game mới
     void startNewGame();
@@ -80,7 +81,7 @@ protected:
 
 private:
     // Core game data - Không dùng bit-packing, dùng Flatten array
-    uint8_t grid[GameConstants::MAX_ROWS * GameConstants::MAX_COLS];
+    uint8_t grid[GameConstants::MAX_CELLS];
     int headRowIndex = 0;
     GameState gameState;
     GameState prePauseState;
@@ -123,10 +124,10 @@ private:
     int getEggCount() const;
     
     // Thuật toán: Fixed-size tĩnh để tránh overhead cấp phát
-    bool visited[GameConstants::MAX_ROWS * GameConstants::MAX_COLS];
-    bool connected[GameConstants::MAX_ROWS * GameConstants::MAX_COLS];
-    int algoQueueStack[GameConstants::MAX_ROWS * GameConstants::MAX_COLS];
-    int matchGroup[GameConstants::MAX_ROWS * GameConstants::MAX_COLS];
+    bool visited[GameConstants::MAX_CELLS];
+    bool connected[GameConstants::MAX_CELLS];
+    int algoQueueStack[GameConstants::MAX_CELLS];
+    int matchGroup[GameConstants::MAX_CELLS];
     
     // Helper tọa độ & tiện ích DRY
     void getCellCenter(int col, int row, float &px, float &py) const;

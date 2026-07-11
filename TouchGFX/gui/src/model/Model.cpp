@@ -83,7 +83,7 @@ void Model::tick()
             shiftGridDown();
             rowsSpawnedCount++;
             
-            int idx = rowsSpawnedCount > 31 ? 31 : rowsSpawnedCount;
+            int idx = rowsSpawnedCount > MAX_SPAWN_LUT_INDEX ? MAX_SPAWN_LUT_INDEX : rowsSpawnedCount;
             rowSpawnInterval = SPAWN_INTERVAL_LUT[idx];
             
             rowSpawnTimer = rowSpawnInterval;
@@ -92,7 +92,7 @@ void Model::tick()
         if (getEggCount() < MIN_BALLS_THRESHOLD) {
             shiftGridDown();
             rowsSpawnedCount++;
-            int idx = rowsSpawnedCount > 31 ? 31 : rowsSpawnedCount;
+            int idx = rowsSpawnedCount > MAX_SPAWN_LUT_INDEX ? MAX_SPAWN_LUT_INDEX : rowsSpawnedCount;
             rowSpawnInterval = SPAWN_INTERVAL_LUT[idx];
             rowSpawnTimer = rowSpawnInterval;
         }
@@ -328,7 +328,7 @@ void Model::checkMatches(int col, int row)
         dropFloatingEggs();
         
         // Thay vi reset ve IDLE ngay, cho 30 ticks (0.5s) cho UI tha roi trung
-        clearingTimer = 30;
+        clearingTimer = CLEARING_FRAMES_DELAY;
     }
 }
 
@@ -366,7 +366,7 @@ void Model::dropFloatingEggs()
     
     int dropCount = 0;
     int r = 0, c = 0;
-    for (int i = 0; i < GameConstants::MAX_ROWS * GameConstants::MAX_COLS; i++) {
+    for (int i = 0; i < GameConstants::MAX_CELLS; i++) {
         if (grid[getPhysicalIndex(r, c)] != GameConstants::EMPTY_COLOR && !connected[i]) {
             grid[getPhysicalIndex(r, c)] = GameConstants::EMPTY_COLOR;
             score += GameConstants::SCORE_DROP_ORPHAN;
@@ -495,4 +495,14 @@ int Model::getEggCount() const {
         }
     }
     return count;
+}
+
+void Model::swapColor()
+{
+    int temp = currentColor;
+    currentColor = nextColor;
+    nextColor = temp;
+    
+    dinoState = DINO_THROW;
+    dinoAnimTimer = GameConstants::DINO_THROW_FRAMES;
 }

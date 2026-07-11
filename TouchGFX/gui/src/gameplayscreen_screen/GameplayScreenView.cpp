@@ -3,6 +3,7 @@
 #include <cstring>
 #include <touchgfx/Color.hpp>
 #include <math.h>
+#include "stm32f4xx_hal.h"
 
 using namespace GameConstants;
 
@@ -16,11 +17,16 @@ GameplayScreenView::GameplayScreenView()
     lastColor = -1;
     smoothedAimX = BULLET_START_X;
     smoothedAimY = BULLET_START_Y;
+    prevSwap = false;
+    prevShoot = false;
 }
 
 void GameplayScreenView::setupScreen()
 {
     GameplayScreenViewBase::setupScreen();
+    
+    prevShoot = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7) == GPIO_PIN_RESET);
+    prevSwap  = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5) == GPIO_PIN_RESET);
     
     // Khởi tạo dino hiển thị next color
     int nextColor = presenter->getNextColor();
@@ -147,6 +153,48 @@ void GameplayScreenView::handleTickEvent()
 
     presenter->tick();
 
+    // ==========================================
+    // HARDWARE BUTTON LOGIC (Direct Polling)
+    // ==========================================
+    bool isLeft  = (HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_2) == GPIO_PIN_RESET);
+    bool isRight = (HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_3) == GPIO_PIN_RESET);
+    bool isSwap  = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5) == GPIO_PIN_RESET);
+    bool isShoot = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7) == GPIO_PIN_RESET);
+
+    if (isLeft || isRight) {
+        if (!isAiming) {
+            isAiming = true;
+            aimX = (int)smoothedAimX;
+            aimY = BULLET_START_Y - AIM_START_Y_OFFSET;
+        }
+        
+        if (isLeft) {
+            aimX -= 1;
+            if (aimX < 0) aimX = 0;
+        } else if (isRight) {
+            aimX += 1;
+            if (aimX > SCREEN_WIDTH) aimX = SCREEN_WIDTH;
+        }
+        
+        presenter->handleTouchAim(aimX, aimY);
+    }
+
+    if (isSwap && !prevSwap) {
+        presenter->handleSwapColor();
+    }
+    prevSwap = isSwap;
+
+    if (isShoot && !prevShoot) {
+        if (isAiming) {
+            isAiming = false;
+            presenter->handleTouchShoot((int)smoothedAimX, (int)smoothedAimY);
+        } else {
+            presenter->handleTouchShoot(BULLET_START_X, 0);
+        }
+    }
+    prevShoot = isShoot;
+    // ==========================================
+
     // --- Update trajectory ---
     if (isAiming) {
         // Áp dụng Low-Pass Filter để nội suy góc ngắm, loại bỏ hoàn toàn độ nhiễu của Touch (chống Jittering)
@@ -169,7 +217,7 @@ void GameplayScreenView::handleTickEvent()
         
         int dotIndex = 0;
         float distTraveled = 0.0f;
-        int maxSteps = 1000; // Tránh lặp vô hạn
+        int maxSteps = TRAJECTORY_MAX_STEPS; // Tránh lặp vô hạn
         
         while (maxSteps-- > 0) {
             simX += simVx;

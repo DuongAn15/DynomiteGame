@@ -153,7 +153,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="Application/User/gui/TestMatchLogic.cpp|Application/User/gui/TestInfiniteMode.cpp|Application/User/gui/TestGridMath.cpp|Application/User/gui/TestGameOver.cpp|Application/User/gui/TestFloatingEggs.cpp|Application/User/gui/TestCollision.cpp|Application/User/gui/main_test.cpp|Application/User/gui/TestPredictiveRaycast.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Application/User/gui/TestPredictiveRaycast.cpp|Application/User/gui/TestMatchLogic.cpp|Application/User/gui/TestInfiniteMode.cpp|Application/User/gui/TestGridMath.cpp|Application/User/gui/TestGameOver.cpp|Application/User/gui/TestFloatingEggs.cpp|Application/User/gui/TestCollision.cpp|Application/User/gui/main_test.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -304,7 +304,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="Application/User/gui/TestMatchLogic.cpp|Application/User/gui/TestInfiniteMode.cpp|Application/User/gui/TestGridMath.cpp|Application/User/gui/TestGameOver.cpp|Application/User/gui/TestFloatingEggs.cpp|Application/User/gui/TestCollision.cpp|Application/User/gui/main_test.cpp|Application/User/gui/TestPredictiveRaycast.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Application/User/gui/TestPredictiveRaycast.cpp|Application/User/gui/TestMatchLogic.cpp|Application/User/gui/TestInfiniteMode.cpp|Application/User/gui/TestGridMath.cpp|Application/User/gui/TestGameOver.cpp|Application/User/gui/TestFloatingEggs.cpp|Application/User/gui/TestCollision.cpp|Application/User/gui/main_test.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

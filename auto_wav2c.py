@@ -14,23 +14,22 @@ def main():
         print(f"Processing {filename}...")
         try:
             data, sr = librosa.load(file_path, sr=16000, mono=True)
-            # 1. Trim silence (loại bỏ khoảng lặng đầu mút)
             data, _ = librosa.effects.trim(data, top_db=30)
             
-            # 2. Strict duration cropping
             name_lower = filename.lower()
             target_duration = 1.0 # default
-            if 'shoot' in name_lower: target_duration = 0.15
-            elif 'match' in name_lower: target_duration = 0.35
-            elif 'hit' in name_lower or 'drop' in name_lower or 'button' in name_lower: target_duration = 0.20
-            elif 'gameover' in name_lower: target_duration = 1.0
-            elif 'bgm' in name_lower: target_duration = 8.0
+            if 'shoot' in name_lower or 'button' in name_lower: target_duration = 0.15
+            elif 'hit' in name_lower: target_duration = 0.20
+            elif 'match' in name_lower: target_duration = 0.40
+            elif 'drop' in name_lower: target_duration = 0.60
+            elif 'gameover' in name_lower: target_duration = 4.0
+            elif 'bgm_menu' in name_lower: target_duration = 10.0
+            elif 'bgm_gameplay' in name_lower: target_duration = 20.0
                 
             max_samples = int(target_duration * 16000)
             if len(data) > max_samples:
                 data = data[:max_samples]
                 
-            # 3. Quick Fade-Out ở 10% cuối để tránh rít loa
             fade_samples = int(len(data) * 0.1)
             if fade_samples > 0:
                 fade_curve = np.linspace(1.0, 0.0, fade_samples)

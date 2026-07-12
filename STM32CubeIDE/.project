@@ -575,6 +575,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_redPressed.cpp</locationURI>
 		</link>
 		<link>
+			<name>Application/User/gui/AudioManager.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/gui/src/common/AudioManager.cpp</locationURI>
+		</link>
+		<link>
 			<name>Application/User/gui/EndScreenPresenter.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/gui/src/endscreen_screen/EndScreenPresenter.cpp</locationURI>

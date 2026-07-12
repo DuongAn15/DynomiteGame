@@ -16,7 +16,18 @@ extern I2S_HandleTypeDef hi2s3;
 #define AUDIO_BUFFER_SIZE 4096
 static uint16_t audio_buffer[AUDIO_BUFFER_SIZE];
 
-struct AudioChannel {
+struct BgmChannel {
+    const uint8_t* data;
+    uint32_t length;
+    uint32_t position; // byte index
+    bool active;
+    bool looping;
+    int16_t predictor;
+    int8_t step_index;
+    bool is_nibble_high;
+};
+
+struct SfxChannel {
     const uint16_t* data;
     uint32_t length;
     uint32_t position;
@@ -24,12 +35,53 @@ struct AudioChannel {
     bool looping;
 };
 
-static AudioChannel bgmChannel = {nullptr, 0, 0, false, true};
-static AudioChannel sfxChannels[3] = {
+static BgmChannel bgmChannel = {nullptr, 0, 0, false, true, 0, 0, false};
+static SfxChannel sfxChannels[3] = {
     {nullptr, 0, 0, false, false},
     {nullptr, 0, 0, false, false},
     {nullptr, 0, 0, false, false}
 };
+
+static const int16_t step_table[89] = {
+    7, 8, 9, 10, 11, 12, 13, 14, 16, 17,
+    19, 21, 23, 25, 28, 31, 34, 37, 41, 45,
+    50, 55, 60, 66, 73, 80, 88, 97, 107, 118,
+    130, 143, 157, 173, 190, 209, 230, 253, 279, 307,
+    337, 371, 408, 449, 494, 544, 598, 658, 724, 796,
+    876, 963, 1060, 1166, 1282, 1411, 1552, 1707, 1878, 2066,
+    2272, 2499, 2749, 3024, 3327, 3660, 4026, 4428, 4871, 5358,
+    5894, 6484, 7132, 7845, 8630, 9493, 10442, 11487, 12635, 13899,
+    15289, 16818, 18500, 20350, 22385, 24623, 27086, 29794, 32767
+};
+
+static const int8_t index_table[16] = {
+    -1, -1, -1, -1, 2, 4, 6, 8,
+    -1, -1, -1, -1, 2, 4, 6, 8
+};
+
+static int16_t adpcm_decode(uint8_t nibble, int16_t& predictor, int8_t& step_index) {
+    int16_t step = step_table[step_index];
+    int16_t vpdiff = step >> 3;
+
+    if (nibble & 4) vpdiff += step;
+    if (nibble & 2) vpdiff += (step >> 1);
+    if (nibble & 1) vpdiff += (step >> 2);
+
+    if (nibble & 8) {
+        predictor -= vpdiff;
+    } else {
+        predictor += vpdiff;
+    }
+
+    if (predictor > 32767) predictor = 32767;
+    else if (predictor < -32768) predictor = -32768;
+
+    step_index += index_table[nibble];
+    if (step_index < 0) step_index = 0;
+    else if (step_index > 88) step_index = 88;
+
+    return predictor;
+}
 
 static bool initialized = false;
 
@@ -43,13 +95,16 @@ void AudioManager::init() {
     }
 }
 
-void AudioManager::playBGM(const uint16_t* audio, uint32_t length) {
+void AudioManager::playBGM(const uint8_t* audio, uint32_t length) {
     if (!initialized) {
         init();
     }
     bgmChannel.data = audio;
     bgmChannel.length = length;
     bgmChannel.position = 0;
+    bgmChannel.predictor = 0;
+    bgmChannel.step_index = 0;
+    bgmChannel.is_nibble_high = false;
     bgmChannel.active = true;
     bgmChannel.looping = true;
 }
@@ -83,16 +138,29 @@ void AudioManager::playSFX(const uint16_t* audio, uint32_t length) {
 }
 
 static void fillAudioBuffer(uint16_t* buffer, uint32_t size) {
-    for (uint32_t i = 0; i < size; ++i) {
+    for (uint32_t i = 0; i < size; i += 2) {
         int32_t mixed_sample = 0;
         
         if (bgmChannel.active && bgmChannel.data) {
-            int16_t sample = (int16_t)bgmChannel.data[bgmChannel.position];
+            uint8_t byte = bgmChannel.data[bgmChannel.position];
+            uint8_t nibble = bgmChannel.is_nibble_high ? (byte >> 4) : (byte & 0x0F);
+            
+            int16_t sample = adpcm_decode(nibble, bgmChannel.predictor, bgmChannel.step_index);
             mixed_sample += sample;
-            bgmChannel.position++;
+            
+            if (bgmChannel.is_nibble_high) {
+                bgmChannel.position++;
+                bgmChannel.is_nibble_high = false;
+            } else {
+                bgmChannel.is_nibble_high = true;
+            }
+            
             if (bgmChannel.position >= bgmChannel.length) {
                 if (bgmChannel.looping) {
                     bgmChannel.position = 0;
+                    bgmChannel.predictor = 0;
+                    bgmChannel.step_index = 0;
+                    bgmChannel.is_nibble_high = false;
                 } else {
                     bgmChannel.active = false;
                 }
@@ -114,6 +182,9 @@ static void fillAudioBuffer(uint16_t* buffer, uint32_t size) {
         else if (mixed_sample < -32768) mixed_sample = -32768;
         
         buffer[i] = (uint16_t)(int16_t)mixed_sample;
+        if (i + 1 < size) {
+            buffer[i + 1] = (uint16_t)(int16_t)mixed_sample;
+        }
     }
 }
 

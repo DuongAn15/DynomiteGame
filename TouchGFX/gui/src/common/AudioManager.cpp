@@ -2,7 +2,7 @@
 #include "main.h"
 
 // Các file mảng âm thanh nằm trong Core/Inc nên ta include trực tiếp bằng nháy kép vì compiler đã có path này:
-#include "audio_bgm_gameplay.h"
+#include "audio_game_play.h"
 #include "audio_bgm_menu.h"
 #include "audio_sfx_button.h"
 #include "audio_sfx_drop.h"

@@ -2,41 +2,59 @@ import os
 import librosa
 import numpy as np
 
-raw_dir = "Audio_Asssets/Raw"
-out_dir = "Core/Inc"
+def main():
+    raw_dir = 'Audio_Asssets/Raw'
+    out_dir = 'Core/Inc'
+    if not os.path.exists(out_dir): os.makedirs(out_dir)
 
-if not os.path.exists(out_dir):
-    os.makedirs(out_dir)
+    for filename in os.listdir(raw_dir):
+        file_path = os.path.join(raw_dir, filename)
+        if not os.path.isfile(file_path): continue
+            
+        print(f"Processing {filename}...")
+        try:
+            data, sr = librosa.load(file_path, sr=16000, mono=True)
+            # 1. Trim silence (loại bỏ khoảng lặng đầu mút)
+            data, _ = librosa.effects.trim(data, top_db=30)
+            
+            # 2. Strict duration cropping
+            name_lower = filename.lower()
+            target_duration = 1.0 # default
+            if 'shoot' in name_lower: target_duration = 0.15
+            elif 'match' in name_lower: target_duration = 0.35
+            elif 'hit' in name_lower or 'drop' in name_lower or 'button' in name_lower: target_duration = 0.20
+            elif 'gameover' in name_lower: target_duration = 1.0
+            elif 'bgm' in name_lower: target_duration = 8.0
+                
+            max_samples = int(target_duration * 16000)
+            if len(data) > max_samples:
+                data = data[:max_samples]
+                
+            # 3. Quick Fade-Out ở 10% cuối để tránh rít loa
+            fade_samples = int(len(data) * 0.1)
+            if fade_samples > 0:
+                fade_curve = np.linspace(1.0, 0.0, fade_samples)
+                data[-fade_samples:] *= fade_curve
+                
+            data_int16 = np.int16(data * 32767)
+            data_uint16 = data_int16.astype(np.uint16)
+            
+            base_name = os.path.splitext(filename)[0]
+            h_path = os.path.join(out_dir, f"audio_{base_name}.h")
+            array_name = f"audio_{base_name}"
+            
+            with open(h_path, 'w') as f:
+                f.write(f"// Auto-generated from {filename}\n")
+                f.write(f"// Duration: {target_duration}s, Trimmed, Faded\n")
+                f.write(f"#ifndef AUDIO_{base_name.upper()}_H\n#define AUDIO_{base_name.upper()}_H\n\n#include <stdint.h>\n\n")
+                f.write(f"const uint16_t {array_name}[] = {{\n")
+                for i in range(0, len(data_uint16), 12):
+                    chunk = data_uint16[i:i+12]
+                    f.write("    " + ", ".join([f"0x{val:04X}" for val in chunk]) + ",\n")
+                f.write(f"}};\n\nconst uint32_t {array_name}_length = {len(data_uint16)};\n\n#endif\n")
+                
+            print(f"Saved {h_path} ({len(data_uint16)} samples)")
+        except Exception as e:
+            print(f"Error: {e}")
 
-for file in os.listdir(raw_dir):
-    if file.endswith((".wav", ".mp3", ".ogg", ".flac")):
-        file_path = os.path.join(raw_dir, file)
-        # librosa.load returns float32 array in range [-1.0, 1.0]
-        data, sr = librosa.load(file_path, sr=16000, mono=True)
-        
-        name = os.path.splitext(file)[0]
-        name_lower = name.lower()
-        if 'bgm' in name_lower:
-            data = data[:int(8 * 16000)]
-        elif 'sfx' in name_lower:
-            data = data[:int(1.5 * 16000)]
-            
-        # Convert to uint16_t using given formula
-        data_uint16 = (data * 32767).astype(np.uint16)
-        
-        out_file = os.path.join(out_dir, f"audio_{name}.h")
-        with open(out_file, "w") as f:
-            f.write(f"#ifndef AUDIO_{name.upper()}_H\n")
-            f.write(f"#define AUDIO_{name.upper()}_H\n\n")
-            f.write("#include <stdint.h>\n\n")
-            f.write(f"const uint16_t audio_{name}[{len(data_uint16)}] = {{\n")
-            
-            hex_data = [f"0x{d:04x}" for d in data_uint16]
-            for i in range(0, len(hex_data), 10):
-                f.write("    " + ", ".join(hex_data[i:i+10]) + ",\n")
-            
-            f.write("};\n\n")
-            f.write(f"const uint32_t audio_{name}_length = {len(data_uint16)};\n\n")
-            f.write(f"#endif // AUDIO_{name.upper()}_H\n")
-
-print("Generated audio arrays successfully.")
+if __name__ == '__main__': main()

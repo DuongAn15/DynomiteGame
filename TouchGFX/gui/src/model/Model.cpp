@@ -217,6 +217,7 @@ void Model::updateFlyingPhysics()
             }
             
             if (isGameOver) {
+                AudioManager::stopBGM();
                 AudioManager::playSFX(audio_sfx_gameover, audio_sfx_gameover_length);
                 gameState = STATE_GAME_OVER;
                 if (modelListener) modelListener->notifyGameOver();
@@ -479,6 +480,8 @@ void Model::shiftGridDown() {
     // Neu co trung o hang Game Over, bao ket thuc
     for (int c = 0; c < GameConstants::MAX_COLS; c++) {
         if (grid[getPhysicalIndex(GameConstants::GAME_OVER_ROW, c)] != GameConstants::EMPTY_COLOR) {
+            AudioManager::stopBGM();
+            AudioManager::playSFX(audio_sfx_gameover, audio_sfx_gameover_length);
             gameState = STATE_GAME_OVER;
             if (modelListener) modelListener->notifyGameOver();
             return;

@@ -3,6 +3,13 @@
 #include <math.h>
 #include <string.h>
 
+#include <gui/common/AudioManager.hpp>
+#include "audio_sfx_shoot.h"
+#include "audio_sfx_hit.h"
+#include "audio_sfx_match.h"
+#include "audio_sfx_drop.h"
+#include "audio_sfx_gameover.h"
+
 using namespace GameConstants;
 
 Model::Model() : modelListener(0), highScore(0), rngState(RNG_INITIAL_SEED)
@@ -127,6 +134,8 @@ void Model::handleTouchShoot(int x, int y)
 {
     if (gameState == STATE_AIMING || gameState == STATE_IDLE)
     {
+        AudioManager::playSFX(audio_sfx_shoot, audio_sfx_shoot_length);
+        
         // Tinh goc ngam
         float dx = x - BULLET_START_X;
         float dy = y - BULLET_START_Y;
@@ -197,6 +206,8 @@ void Model::updateFlyingPhysics()
         
         // Neu khong co bong no/roi (score khong doi) thi moi Game Over neu co bong o hang 9
         if (score == oldScore) {
+            AudioManager::playSFX(audio_sfx_hit, audio_sfx_hit_length);
+            
             bool isGameOver = false;
             for (int c = 0; c < GameConstants::MAX_COLS; c++) {
                 if (grid[getPhysicalIndex(GAME_OVER_ROW, c)] != GameConstants::EMPTY_COLOR) {
@@ -206,6 +217,8 @@ void Model::updateFlyingPhysics()
             }
             
             if (isGameOver) {
+                AudioManager::stopBGM();
+                AudioManager::playSFX(audio_sfx_gameover, audio_sfx_gameover_length);
                 gameState = STATE_GAME_OVER;
                 if (modelListener) modelListener->notifyGameOver();
             } else {
@@ -310,6 +323,7 @@ void Model::checkMatches(int col, int row)
     }
     
     if (matchCount >= GameConstants::MIN_MATCH_COUNT) {
+        AudioManager::playSFX(audio_sfx_match, audio_sfx_match_length);
         gameState = STATE_CLEARING;
         if (matchCount == 3) {
             score += GameConstants::SCORE_MATCH_3;
@@ -382,6 +396,7 @@ void Model::dropFloatingEggs()
     if (score > highScore) highScore = score;
     
     if (dropCount > 0) {
+        AudioManager::playSFX(audio_sfx_drop, audio_sfx_drop_length);
         if (modelListener) modelListener->notifyScoreUpdated(score);
     }
 }
@@ -465,6 +480,8 @@ void Model::shiftGridDown() {
     // Neu co trung o hang Game Over, bao ket thuc
     for (int c = 0; c < GameConstants::MAX_COLS; c++) {
         if (grid[getPhysicalIndex(GameConstants::GAME_OVER_ROW, c)] != GameConstants::EMPTY_COLOR) {
+            AudioManager::stopBGM();
+            AudioManager::playSFX(audio_sfx_gameover, audio_sfx_gameover_length);
             gameState = STATE_GAME_OVER;
             if (modelListener) modelListener->notifyGameOver();
             return;

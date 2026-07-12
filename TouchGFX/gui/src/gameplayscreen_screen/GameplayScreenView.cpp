@@ -4,6 +4,8 @@
 #include <touchgfx/Color.hpp>
 #include <math.h>
 #include "stm32f4xx_hal.h"
+#include <gui/common/AudioManager.hpp>
+#include "audio_bgm_gameplay.h"
 
 using namespace GameConstants;
 
@@ -24,6 +26,7 @@ GameplayScreenView::GameplayScreenView()
 void GameplayScreenView::setupScreen()
 {
     GameplayScreenViewBase::setupScreen();
+    AudioManager::playBGM(audio_bgm_gameplay, audio_bgm_gameplay_length);
     
     prevShoot = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7) == GPIO_PIN_RESET);
     prevSwap  = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5) == GPIO_PIN_RESET);

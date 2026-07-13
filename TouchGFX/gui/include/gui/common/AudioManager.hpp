@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+constexpr int MAX_SFX_CHANNELS = 3;
+
 class AudioManager {
 public:
     static void init();

@@ -1,5 +1,6 @@
 #include <gui/common/AudioManager.hpp>
 #include "main.h"
+#include <string.h>
 
 // Các file mảng âm thanh nằm trong Core/Inc nên ta include trực tiếp bằng nháy kép vì compiler đã có path này:
 #include "audio_game_play.h"
@@ -36,7 +37,7 @@ struct SfxChannel {
 };
 
 static BgmChannel bgmChannel = {nullptr, 0, 0, false, true, 0, 0, false};
-static SfxChannel sfxChannels[3] = {
+static SfxChannel sfxChannels[MAX_SFX_CHANNELS] = {
     {nullptr, 0, 0, false, false},
     {nullptr, 0, 0, false, false},
     {nullptr, 0, 0, false, false}
@@ -87,9 +88,7 @@ static bool initialized = false;
 
 void AudioManager::init() {
     if (!initialized) {
-        for (int i = 0; i < AUDIO_BUFFER_SIZE; ++i) {
-            audio_buffer[i] = 0;
-        }
+        memset(audio_buffer, 0, sizeof(audio_buffer));
         HAL_I2S_Transmit_DMA(&hi2s3, (uint16_t*)audio_buffer, AUDIO_BUFFER_SIZE);
         initialized = true;
     }
@@ -119,7 +118,7 @@ void AudioManager::playSFX(const uint16_t* audio, uint32_t length) {
     if (!initialized) {
         init();
     }
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < MAX_SFX_CHANNELS; ++i) {
         if (!sfxChannels[i].active) {
             sfxChannels[i].data = audio;
             sfxChannels[i].length = length;
@@ -167,7 +166,7 @@ static void fillAudioBuffer(uint16_t* buffer, uint32_t size) {
             }
         }
         
-        for (int ch = 0; ch < 3; ++ch) {
+        for (int ch = 0; ch < MAX_SFX_CHANNELS; ++ch) {
             if (sfxChannels[ch].active && sfxChannels[ch].data) {
                 int16_t sample = (int16_t)sfxChannels[ch].data[sfxChannels[ch].position];
                 mixed_sample += sample;

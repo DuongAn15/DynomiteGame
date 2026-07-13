@@ -150,11 +150,6 @@ void GameplayScreenView::handleTickEvent()
 {
     GameplayScreenViewBase::handleTickEvent();
 
-    if (presenter->getGameState() == STATE_GAME_OVER) {
-        application().gotoEndScreenScreenNoTransition();
-        return;
-    }
-
     presenter->tick();
 
     // ==========================================

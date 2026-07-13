@@ -220,7 +220,7 @@ void Model::updateFlyingPhysics()
                 AudioManager::stopBGM();
                 AudioManager::playSFX(audio_sfx_gameover, audio_sfx_gameover_length);
                 gameState = STATE_GAME_OVER;
-                if (modelListener) modelListener->notifyGameOver();
+                if (modelListener != 0) { modelListener->notifyGameOver(); }
             } else {
                 if (gameState != STATE_CLEARING) { 
                     gameState = STATE_IDLE;
@@ -483,7 +483,7 @@ void Model::shiftGridDown() {
             AudioManager::stopBGM();
             AudioManager::playSFX(audio_sfx_gameover, audio_sfx_gameover_length);
             gameState = STATE_GAME_OVER;
-            if (modelListener) modelListener->notifyGameOver();
+            if (modelListener != 0) { modelListener->notifyGameOver(); }
             return;
         }
     }

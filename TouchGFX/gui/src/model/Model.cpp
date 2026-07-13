@@ -167,69 +167,77 @@ void Model::handleTouchShoot(int x, int y)
 
 void Model::updateFlyingPhysics()
 {
-    bulletX += vx;
-    bulletY += vy;
-    
-    // 1. Phan xa tuong (dong bo diem doi voi UI) va chan dinh tuong
-    if (bulletX <= LEFT_WALL && vx < 0) {
-        bulletX = LEFT_WALL + (LEFT_WALL - bulletX);
-        vx = -vx;
-    }
-    else if (bulletX >= RIGHT_WALL && vx > 0) {
-        bulletX = RIGHT_WALL - (bulletX - RIGHT_WALL);
-        vx = -vx;
-    }
-    
-    // 2. Kiem tra va cham (Dung ham phi trang thai da tach)
-    bool collision = isCollisionAt(bulletX, bulletY);
-    
-    // 3. Xu ly sau va cham
-    if (collision) {
-        int snapCol, snapRow;
-        snapToGrid(bulletX, bulletY, snapCol, snapRow);
+    int subSteps = 3;
+    float stepVx = vx / subSteps;
+    float stepVy = vy / subSteps;
+    for (int i = 0; i < subSteps; i++) {
+        bulletX += stepVx;
+        bulletY += stepVy;
         
-        // Snap that bai hoac o da bi chiem -> bo qua, mat luot
-        if (snapCol < 0 || snapRow < 0 || grid[getPhysicalIndex(snapRow, snapCol)] != EMPTY_COLOR) {
-            bulletVisible = false;
-            gameState = STATE_IDLE;
-            currentColor = nextColor;
-            nextColor = randomColor();
-            return;
+        // 1. Phan xa tuong (dong bo diem doi voi UI) va chan dinh tuong
+        if (bulletX <= LEFT_WALL && vx < 0) {
+            bulletX = LEFT_WALL + (LEFT_WALL - bulletX);
+            vx = -vx;
+            stepVx = -stepVx;
+        }
+        else if (bulletX >= RIGHT_WALL && vx > 0) {
+            bulletX = RIGHT_WALL - (bulletX - RIGHT_WALL);
+            vx = -vx;
+            stepVx = -stepVx;
         }
         
-        grid[getPhysicalIndex(snapRow, snapCol)] = currentColor;
-        cachedEggCount++;
+        // 2. Kiem tra va cham (Dung ham phi trang thai da tach)
+        bool collision = isCollisionAt(bulletX, bulletY);
         
-        int oldScore = score;
-        checkMatches(snapCol, snapRow);
-        
-        // An bullet sau khi gan vao luoi
-        bulletVisible = false;
-        currentColor = nextColor;
-        nextColor = randomColor();
-        
-        // Neu khong co bong no/roi (score khong doi) thi moi Game Over neu co bong o hang 9
-        if (score == oldScore) {
-            AudioManager::playSFX(audio_sfx_hit, audio_sfx_hit_length);
+        // 3. Xu ly sau va cham
+        if (collision) {
+            int snapCol, snapRow;
+            snapToGrid(bulletX, bulletY, snapCol, snapRow);
             
-            bool isGameOver = false;
-            for (int c = 0; c < GameConstants::MAX_COLS; c++) {
-                if (grid[getPhysicalIndex(GAME_OVER_ROW, c)] != GameConstants::EMPTY_COLOR) {
-                    isGameOver = true;
-                    break;
-                }
+            // Snap that bai hoac o da bi chiem -> bo qua, mat luot
+            if (snapCol < 0 || snapRow < 0 || grid[getPhysicalIndex(snapRow, snapCol)] != EMPTY_COLOR) {
+                bulletVisible = false;
+                gameState = STATE_IDLE;
+                currentColor = nextColor;
+                nextColor = randomColor();
+                return;
             }
             
-            if (isGameOver) {
-                AudioManager::stopBGM();
-                AudioManager::playSFX(audio_sfx_gameover, audio_sfx_gameover_length);
-                gameState = STATE_GAME_OVER;
-                if (modelListener != 0) { modelListener->notifyGameOver(); }
-            } else {
-                if (gameState != STATE_CLEARING) { 
-                    gameState = STATE_IDLE;
+            grid[getPhysicalIndex(snapRow, snapCol)] = currentColor;
+            cachedEggCount++;
+            
+            int oldScore = score;
+            checkMatches(snapCol, snapRow);
+            
+            // An bullet sau khi gan vao luoi
+            bulletVisible = false;
+            currentColor = nextColor;
+            nextColor = randomColor();
+            
+            // Neu khong co bong no/roi (score khong doi) thi moi Game Over neu co bong o hang 9
+            if (score == oldScore) {
+                AudioManager::playSFX(audio_sfx_hit, audio_sfx_hit_length);
+                
+                bool isGameOver = false;
+                for (int c = 0; c < GameConstants::MAX_COLS; c++) {
+                    if (grid[getPhysicalIndex(GAME_OVER_ROW, c)] != GameConstants::EMPTY_COLOR) {
+                        isGameOver = true;
+                        break;
+                    }
+                }
+                
+                if (isGameOver) {
+                    AudioManager::stopBGM();
+                    AudioManager::playSFX(audio_sfx_gameover, audio_sfx_gameover_length);
+                    gameState = STATE_GAME_OVER;
+                    if (modelListener != 0) { modelListener->notifyGameOver(); }
+                } else {
+                    if (gameState != STATE_CLEARING) { 
+                        gameState = STATE_IDLE;
+                    }
                 }
             }
+            return;
         }
     }
 }

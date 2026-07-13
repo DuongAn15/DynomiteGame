@@ -14,6 +14,10 @@ namespace GameConstants {
     constexpr int EGG_GRID_WIDTH = 228; // Chiều rộng của khu vực lưới trứng
     constexpr float CELL_WIDTH = 24.0f; // Chiều rộng của một ô lưới (tọa độ thực)
     constexpr float CELL_HEIGHT = 28.0f; // Chiều cao của một ô lưới (tọa độ thực)
+    constexpr float INV_CELL_HEIGHT = 1.0f / CELL_HEIGHT; // Hằng số nghịch đảo chiều cao ô lưới để thay phép chia bằng phép nhân
+    static const int PHYSICS_SUB_STEPS = 3; // Số bước chia nhỏ (sub-stepping) để chống đạn bay xuyên tường
+    static const int MAX_TRAJECTORY_STEPS = 300; // Giới hạn số điểm tối đa của tia raycast đường ngắm
+    static const int GRID_UI_OFFSET_Y = 22; // Khoảng cách bù Y (offset) khi vẽ lưới trứng lên màn hình
     constexpr float GRID_START_X = 12.0f; // Tọa độ X bắt đầu của lưới
     constexpr float GRID_START_Y = -8.0f; // Tọa độ Y bắt đầu của lưới (Dịch lên 28.0f từ 20.0f)
     constexpr int UI_CELL_WIDTH = 24; // Chiều rộng của một ô lưới trên UI (pixel)
@@ -47,7 +51,6 @@ namespace GameConstants {
     constexpr float AIM_START_Y_OFFSET = 50.0f; // Khoảng lệch Y khi bắt đầu vẽ tia nhắm bắn
     
     constexpr int TRAJECTORY_DOTS_COUNT = 15; // Số lượng chấm hiển thị trên đường dự đoán quỹ đạo
-    constexpr int TRAJECTORY_MAX_STEPS = 300; // Số bước mô phỏng tối đa cho đường quỹ đạo
     constexpr int16_t TRAJECTORY_DOT_SIZE = 4; // Kích thước của chấm quỹ đạo (pixel)
     constexpr int16_t TRAJECTORY_DOT_OFFSET = 2; // Độ lệch (tâm) của chấm quỹ đạo
     constexpr float TRAJECTORY_DOT_START_DIST = 30.0f; // Khoảng cách từ điểm bắn đến chấm quỹ đạo đầu tiên
@@ -164,6 +167,13 @@ namespace GameConstants {
         6 * UI_CELL_WIDTH + UI_CELL_OFFSET_X, 7 * UI_CELL_WIDTH + UI_CELL_OFFSET_X,
         8 * UI_CELL_WIDTH + UI_CELL_OFFSET_X
     };
+
+    // Đóng gói Hàng và Cột vào một số nguyên 16-bit
+    inline uint16_t packHex(uint8_t row, uint8_t col) { return (row << 8) | col; }
+    // Lấy giá trị Hàng từ số nguyên 16-bit
+    inline uint8_t unpackRow(uint16_t val) { return val >> 8; }
+    // Lấy giá trị Cột từ số nguyên 16-bit
+    inline uint8_t unpackCol(uint16_t val) { return val & 0xFF; }
 }
 
 #endif // GAME_CONSTANTS_HPP

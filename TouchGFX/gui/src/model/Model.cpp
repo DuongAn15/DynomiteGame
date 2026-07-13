@@ -167,7 +167,7 @@ void Model::handleTouchShoot(int x, int y)
 
 void Model::updateFlyingPhysics()
 {
-    int subSteps = 3;
+    int subSteps = GameConstants::PHYSICS_SUB_STEPS;
     float stepVx = vx / subSteps;
     float stepVy = vy / subSteps;
     for (int i = 0; i < subSteps; i++) {
@@ -309,15 +309,15 @@ void Model::checkMatches(int col, int row)
     
     int matchCount = 0;
     
-    algoQueueStack[qTail++] = (row << 8) | col;
+    algoQueueStack[qTail++] = GameConstants::packHex(row, col);
     visited[row * MAX_COLS + col] = true;
     
     while (qHead < qTail) {
         int curr = algoQueueStack[qHead++];
         matchGroup[matchCount++] = curr;
         
-        int r = curr >> 8;
-        int c = curr & 0xFF;
+        int r = GameConstants::unpackRow(curr);
+        int c = GameConstants::unpackCol(curr);
         
         for (int i = 0; i < HEX_NEIGHBORS_COUNT; i++) {
             int parity = (r + gridParityOffset) & 1;
@@ -328,7 +328,7 @@ void Model::checkMatches(int col, int row)
                 int nIdx = nr * MAX_COLS + nc;
                 if (!visited[nIdx] && grid[getPhysicalIndex(nr, nc)] == targetColor) {
                     visited[nIdx] = true;
-                    algoQueueStack[qTail++] = (nr << 8) | nc;
+                    algoQueueStack[qTail++] = GameConstants::packHex(nr, nc);
                 }
             }
         }
@@ -349,7 +349,7 @@ void Model::checkMatches(int col, int row)
         
         for (int i = 0; i < matchCount; i++) {
             int curr = matchGroup[i];
-            grid[getPhysicalIndex(curr >> 8, curr & 0xFF)] = GameConstants::EMPTY_COLOR;
+            grid[getPhysicalIndex(GameConstants::unpackRow(curr), GameConstants::unpackCol(curr))] = GameConstants::EMPTY_COLOR;
             cachedEggCount--;
         }
         
@@ -367,15 +367,15 @@ void Model::dropFloatingEggs()
     
     for (int c = 0; c < MAX_COLS; c++) {
         if (grid[getPhysicalIndex(0, c)] != EMPTY_COLOR) {
-            algoQueueStack[top++] = (0 << 8) | c;
+            algoQueueStack[top++] = GameConstants::packHex(0, c);
             connected[0 * MAX_COLS + c] = true;
         }
     }
     
     while (top > 0) {
         int curr = algoQueueStack[--top];
-        int r = curr >> 8;
-        int c = curr & 0xFF;
+        int r = GameConstants::unpackRow(curr);
+        int c = GameConstants::unpackCol(curr);
         
         for (int i = 0; i < HEX_NEIGHBORS_COUNT; i++) {
             int parity = (r + gridParityOffset) & 1;
@@ -386,7 +386,7 @@ void Model::dropFloatingEggs()
                 int nIdx = nr * MAX_COLS + nc;
                 if (!connected[nIdx] && grid[getPhysicalIndex(nr, nc)] != EMPTY_COLOR) {
                     connected[nIdx] = true;
-                    algoQueueStack[top++] = (nr << 8) | nc;
+                    algoQueueStack[top++] = GameConstants::packHex(nr, nc);
                 }
             }
         }
@@ -426,8 +426,8 @@ float Model::calculateDistanceSq(float x1, float y1, float x2, float y2) const
 
 void Model::getApproxCell(float x, float y, int &col, int &row) const
 {
-    row = (int)roundf((y - GameConstants::GRID_START_Y - globalOffsetY) / GameConstants::CELL_HEIGHT);
-    col = (int)roundf((x - GameConstants::GRID_START_X) / GameConstants::CELL_WIDTH);
+    row = (int)roundf((y - GameConstants::GRID_START_Y - globalOffsetY) * GameConstants::INV_CELL_HEIGHT);
+    col = (int)roundf((x - GameConstants::GRID_START_X) * (1.0f / GameConstants::CELL_WIDTH));
 }
 
 bool Model::isValidCell(int row, int col) const

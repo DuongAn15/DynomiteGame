@@ -520,6 +520,49 @@ void Model::getGridData(uint8_t* out) const {
     }
 }
 
+void Model::calculateTrajectory(float startX, float startY, float dx, float dy, TrajectoryPoint* outPath, int& outCount, int maxSteps)
+{
+    float length = sqrtf(dx*dx + dy*dy);
+    if (length == 0.0f) {
+        outCount = 0;
+        return;
+    }
+    
+    float simVx = (dx / length) * GameConstants::BULLET_SPEED;
+    float simVy = (dy / length) * GameConstants::BULLET_SPEED;
+    float simX = startX;
+    float simY = startY;
+    
+    int dotIndex = 0;
+    float distTraveled = 0.0f;
+    
+    while (maxSteps-- > 0) {
+        simX += simVx;
+        simY += simVy;
+        distTraveled += GameConstants::BULLET_SPEED;
+        
+        if (simX <= GameConstants::LEFT_WALL && simVx < 0) {
+            simX = GameConstants::LEFT_WALL + (GameConstants::LEFT_WALL - simX);
+            simVx = -simVx;
+        } else if (simX >= GameConstants::RIGHT_WALL && simVx > 0) {
+            simX = GameConstants::RIGHT_WALL - (simX - GameConstants::RIGHT_WALL);
+            simVx = -simVx;
+        }
+        
+        if (isCollisionAt(simX, simY)) {
+            break;
+        }
+        
+        float nextDotDist = GameConstants::TRAJECTORY_DOT_START_DIST + dotIndex * GameConstants::TRAJECTORY_DOT_SPACING;
+        if (distTraveled >= nextDotDist && dotIndex < GameConstants::TRAJECTORY_DOTS_COUNT) {
+            outPath[dotIndex].x = simX;
+            outPath[dotIndex].y = simY;
+            dotIndex++;
+        }
+    }
+    outCount = dotIndex;
+}
+
 void Model::swapColor()
 {
     int temp = currentColor;

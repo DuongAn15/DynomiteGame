@@ -103,6 +103,11 @@ void GameplayScreenPresenter::getGridData(uint8_t* out) const
     model->getGridData(out);
 }
 
+void GameplayScreenPresenter::getTrajectory(float startX, float startY, float dx, float dy, TrajectoryPoint* outPath, int& outCount, int maxSteps)
+{
+    model->calculateTrajectory(startX, startY, dx, dy, outPath, outCount, maxSteps);
+}
+
 void GameplayScreenPresenter::notifyGameOver()
 {
     // Báo cho UI chuyển sang màn hình GameOver (nếu có)

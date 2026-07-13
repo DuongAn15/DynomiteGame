@@ -213,42 +213,15 @@ void GameplayScreenView::handleTickEvent()
         // Reset toàn bộ chấm ảo về trạng thái ẩn
         hideTrajectory();
         
-        // Predictive Raycasting
-        float simVx = (dx / length) * BULLET_SPEED;
-        float simVy = (dy / length) * BULLET_SPEED;
-        float simX = BULLET_START_X;
-        float simY = BULLET_START_Y;
+        // Predictive Raycasting via Model
+        TrajectoryPoint path[300];
+        int count = 0;
+        presenter->getTrajectory(BULLET_START_X, BULLET_START_Y, dx, dy, path, count, TRAJECTORY_MAX_STEPS);
         
-        int dotIndex = 0;
-        float distTraveled = 0.0f;
-        int maxSteps = TRAJECTORY_MAX_STEPS; // Tránh lặp vô hạn
-        
-        while (maxSteps-- > 0) {
-            simX += simVx;
-            simY += simVy;
-            distTraveled += BULLET_SPEED;
-            
-            // Phản xạ bật tường (chỉnh tâm dội chạm mép theo chuẩn) và chặn dính tường
-            if (simX <= LEFT_WALL && simVx < 0) {
-                simX = LEFT_WALL + (LEFT_WALL - simX);
-                simVx = -simVx;
-            } else if (simX >= RIGHT_WALL && simVx > 0) {
-                simX = RIGHT_WALL - (simX - RIGHT_WALL);
-                simVx = -simVx;
-            }
-            
-            // Dự đoán va chạm: Gọi hàm phi trạng thái từ Model
-            if (presenter->isCollisionAt(simX, simY)) {
-                break; // Dừng rải nét đứt ngay trước điểm va chạm!
-            }
-            
-            float nextDotDist = TRAJECTORY_DOT_START_DIST + dotIndex * TRAJECTORY_DOT_SPACING;
-            if (distTraveled >= nextDotDist && dotIndex < TRAJECTORY_DOTS_COUNT) {
-                trajectoryDots[dotIndex].setPosition((int)simX - TRAJECTORY_DOT_OFFSET, (int)simY - TRAJECTORY_DOT_OFFSET, TRAJECTORY_DOT_SIZE, TRAJECTORY_DOT_SIZE);
-                trajectoryDots[dotIndex].setVisible(true);
-                trajectoryDots[dotIndex].invalidate();
-                dotIndex++;
-            }
+        for (int i = 0; i < count; i++) {
+            trajectoryDots[i].setPosition((int)path[i].x - TRAJECTORY_DOT_OFFSET, (int)path[i].y - TRAJECTORY_DOT_OFFSET, TRAJECTORY_DOT_SIZE, TRAJECTORY_DOT_SIZE);
+            trajectoryDots[i].setVisible(true);
+            trajectoryDots[i].invalidate();
         }
     } else {
         hideTrajectory();

@@ -2,6 +2,7 @@
 #define GAMEPLAYSCREENPRESENTER_HPP
 
 #include <gui/model/ModelListener.hpp>
+#include <gui/model/Model.hpp>
 #include <mvp/Presenter.hpp>
 
 using namespace touchgfx;
@@ -45,6 +46,7 @@ public:
     float getGlobalOffsetY() const;
     int getGridParityOffset() const;
     void getGridData(uint8_t* out) const;
+    void getTrajectory(float startX, float startY, float dx, float dy, TrajectoryPoint* outPath, int& outCount, int maxSteps);
     
     // ModelListener overrides
     void notifyGameOver() override;

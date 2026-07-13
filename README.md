@@ -14,10 +14,10 @@
 Xem trực tiếp gameplay của dự án! 
 
 <div align="center">
-  <video src="resources/DynomiteGame.mp4" width="600" controls></video>
+  <a href="https://drive.google.com/file/d/1igz07cec7RUS76E1mIFbpl1YDoNRslZF/view?usp=drivesdk">
+    <img src="https://img.shields.io/badge/▶_Xem_Video_Demo_Gameplay-Google_Drive-red?style=for-the-badge&logo=googledrive" alt="Xem Demo">
+  </a>
 </div>
-
-> *Lưu ý: Nếu video trên không tự động phát trên GitHub, bạn có thể tải xuống và xem trực tiếp từ đường dẫn `resources/DynomiteGame.mp4`.*
 
 ---
 

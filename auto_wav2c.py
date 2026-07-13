@@ -3,7 +3,7 @@ import librosa
 import numpy as np
 
 def main():
-    raw_dir = 'Audio_Asssets/Raw'
+    raw_dir = 'Audio_Assets'
     out_dir = 'Core/Inc'
     if not os.path.exists(out_dir): os.makedirs(out_dir)
 
@@ -23,8 +23,8 @@ def main():
             elif 'match' in name_lower: target_duration = 0.40
             elif 'drop' in name_lower: target_duration = 0.60
             elif 'gameover' in name_lower: target_duration = 4.0
-            elif 'bgm_menu' in name_lower: target_duration = 10.0
-            elif 'bgm_gameplay' in name_lower: target_duration = 20.0
+            elif 'bgm_menu' in name_lower: target_duration = 5.0
+            elif 'bgm_gameplay' in name_lower: target_duration = 10.0
                 
             max_samples = int(target_duration * 16000)
             if len(data) > max_samples:
@@ -35,7 +35,9 @@ def main():
                 fade_curve = np.linspace(1.0, 0.0, fade_samples)
                 data[-fade_samples:] *= fade_curve
                 
+            data = np.clip(data, -1.0, 1.0)
             data_int16 = np.int16(data * 32767)
+            data_int16 = np.repeat(data_int16, 2)
             data_uint16 = data_int16.astype(np.uint16)
             
             base_name = os.path.splitext(filename)[0]

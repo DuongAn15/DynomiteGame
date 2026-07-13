@@ -6,7 +6,7 @@
 class AudioManager {
 public:
     static void init();
-    static void playBGM(const uint16_t* audio, uint32_t length);
+    static void playBGM(const uint8_t* audio, uint32_t length);
     static void playSFX(const uint16_t* audio, uint32_t length);
     static void stopBGM();
 };

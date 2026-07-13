@@ -2,6 +2,7 @@
 #include <gui/model/ModelListener.hpp>
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <gui/common/AudioManager.hpp>
 #include "audio_sfx_shoot.h"
@@ -12,7 +13,7 @@
 
 using namespace GameConstants;
 
-Model::Model() : modelListener(0), highScore(0), rngState(RNG_INITIAL_SEED)
+Model::Model() : modelListener(0), highScore(0), rngState(RNG_INITIAL_SEED), systemTicks(0)
 {
     startNewGame();
 }
@@ -30,6 +31,8 @@ int Model::randomColor()
 
 void Model::startNewGame()
 {
+    srand(systemTicks);
+    rngState = systemTicks;
     cachedEggCount = 0;
     memset(grid, EMPTY_COLOR, sizeof(grid));
     headRowIndex = 0;
@@ -70,6 +73,7 @@ void Model::startNewGame()
 
 void Model::tick()
 {
+    systemTicks++;
     // Dino animation update
     if (dinoState == DINO_THROW) {
         dinoAnimTimer--;

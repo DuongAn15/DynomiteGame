@@ -116,6 +116,7 @@ private:
     int dropTimer;
     int clearingTimer;
     int totalTicks;
+    uint32_t systemTicks;
     float globalOffsetY;
     
     // Row spawn timer (frame counting)

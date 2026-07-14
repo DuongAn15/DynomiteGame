@@ -2,6 +2,7 @@
 #include <gui/model/ModelListener.hpp>
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <gui/common/AudioManager.hpp>
 #include "audio_sfx_shoot.h"
@@ -12,7 +13,7 @@
 
 using namespace GameConstants;
 
-Model::Model() : modelListener(0), highScore(0), rngState(RNG_INITIAL_SEED)
+Model::Model() : modelListener(0), highScore(0), rngState(RNG_INITIAL_SEED), systemTicks(0)
 {
     startNewGame();
 }
@@ -30,6 +31,8 @@ int Model::randomColor()
 
 void Model::startNewGame()
 {
+    srand(systemTicks);
+    rngState = systemTicks;
     cachedEggCount = 0;
     memset(grid, EMPTY_COLOR, sizeof(grid));
     headRowIndex = 0;
@@ -70,6 +73,7 @@ void Model::startNewGame()
 
 void Model::tick()
 {
+    systemTicks++;
     // Dino animation update
     if (dinoState == DINO_THROW) {
         dinoAnimTimer--;
@@ -163,69 +167,77 @@ void Model::handleTouchShoot(int x, int y)
 
 void Model::updateFlyingPhysics()
 {
-    bulletX += vx;
-    bulletY += vy;
-    
-    // 1. Phan xa tuong (dong bo diem doi voi UI) va chan dinh tuong
-    if (bulletX <= LEFT_WALL && vx < 0) {
-        bulletX = LEFT_WALL + (LEFT_WALL - bulletX);
-        vx = -vx;
-    }
-    else if (bulletX >= RIGHT_WALL && vx > 0) {
-        bulletX = RIGHT_WALL - (bulletX - RIGHT_WALL);
-        vx = -vx;
-    }
-    
-    // 2. Kiem tra va cham (Dung ham phi trang thai da tach)
-    bool collision = isCollisionAt(bulletX, bulletY);
-    
-    // 3. Xu ly sau va cham
-    if (collision) {
-        int snapCol, snapRow;
-        snapToGrid(bulletX, bulletY, snapCol, snapRow);
+    int subSteps = GameConstants::PHYSICS_SUB_STEPS;
+    float stepVx = vx / subSteps;
+    float stepVy = vy / subSteps;
+    for (int i = 0; i < subSteps; i++) {
+        bulletX += stepVx;
+        bulletY += stepVy;
         
-        // Snap that bai hoac o da bi chiem -> bo qua, mat luot
-        if (snapCol < 0 || snapRow < 0 || grid[getPhysicalIndex(snapRow, snapCol)] != EMPTY_COLOR) {
-            bulletVisible = false;
-            gameState = STATE_IDLE;
-            currentColor = nextColor;
-            nextColor = randomColor();
-            return;
+        // 1. Phan xa tuong (dong bo diem doi voi UI) va chan dinh tuong
+        if (bulletX <= LEFT_WALL && vx < 0) {
+            bulletX = LEFT_WALL + (LEFT_WALL - bulletX);
+            vx = -vx;
+            stepVx = -stepVx;
+        }
+        else if (bulletX >= RIGHT_WALL && vx > 0) {
+            bulletX = RIGHT_WALL - (bulletX - RIGHT_WALL);
+            vx = -vx;
+            stepVx = -stepVx;
         }
         
-        grid[getPhysicalIndex(snapRow, snapCol)] = currentColor;
-        cachedEggCount++;
+        // 2. Kiem tra va cham (Dung ham phi trang thai da tach)
+        bool collision = isCollisionAt(bulletX, bulletY);
         
-        int oldScore = score;
-        checkMatches(snapCol, snapRow);
-        
-        // An bullet sau khi gan vao luoi
-        bulletVisible = false;
-        currentColor = nextColor;
-        nextColor = randomColor();
-        
-        // Neu khong co bong no/roi (score khong doi) thi moi Game Over neu co bong o hang 9
-        if (score == oldScore) {
-            AudioManager::playSFX(audio_sfx_hit, audio_sfx_hit_length);
+        // 3. Xu ly sau va cham
+        if (collision) {
+            int snapCol, snapRow;
+            snapToGrid(bulletX, bulletY, snapCol, snapRow);
             
-            bool isGameOver = false;
-            for (int c = 0; c < GameConstants::MAX_COLS; c++) {
-                if (grid[getPhysicalIndex(GAME_OVER_ROW, c)] != GameConstants::EMPTY_COLOR) {
-                    isGameOver = true;
-                    break;
-                }
+            // Snap that bai hoac o da bi chiem -> bo qua, mat luot
+            if (snapCol < 0 || snapRow < 0 || grid[getPhysicalIndex(snapRow, snapCol)] != EMPTY_COLOR) {
+                bulletVisible = false;
+                gameState = STATE_IDLE;
+                currentColor = nextColor;
+                nextColor = randomColor();
+                return;
             }
             
-            if (isGameOver) {
-                AudioManager::stopBGM();
-                AudioManager::playSFX(audio_sfx_gameover, audio_sfx_gameover_length);
-                gameState = STATE_GAME_OVER;
-                if (modelListener) modelListener->notifyGameOver();
-            } else {
-                if (gameState != STATE_CLEARING) { 
-                    gameState = STATE_IDLE;
+            grid[getPhysicalIndex(snapRow, snapCol)] = currentColor;
+            cachedEggCount++;
+            
+            int oldScore = score;
+            checkMatches(snapCol, snapRow);
+            
+            // An bullet sau khi gan vao luoi
+            bulletVisible = false;
+            currentColor = nextColor;
+            nextColor = randomColor();
+            
+            // Neu khong co bong no/roi (score khong doi) thi moi Game Over neu co bong o hang 9
+            if (score == oldScore) {
+                AudioManager::playSFX(audio_sfx_hit, audio_sfx_hit_length);
+                
+                bool isGameOver = false;
+                for (int c = 0; c < GameConstants::MAX_COLS; c++) {
+                    if (grid[getPhysicalIndex(GAME_OVER_ROW, c)] != GameConstants::EMPTY_COLOR) {
+                        isGameOver = true;
+                        break;
+                    }
+                }
+                
+                if (isGameOver) {
+                    AudioManager::stopBGM();
+                    AudioManager::playSFX(audio_sfx_gameover, audio_sfx_gameover_length);
+                    gameState = STATE_GAME_OVER;
+                    if (modelListener != 0) { modelListener->notifyGameOver(); }
+                } else {
+                    if (gameState != STATE_CLEARING) { 
+                        gameState = STATE_IDLE;
+                    }
                 }
             }
+            return;
         }
     }
 }
@@ -297,15 +309,15 @@ void Model::checkMatches(int col, int row)
     
     int matchCount = 0;
     
-    algoQueueStack[qTail++] = (row << 8) | col;
+    algoQueueStack[qTail++] = GameConstants::packHex(row, col);
     visited[row * MAX_COLS + col] = true;
     
     while (qHead < qTail) {
         int curr = algoQueueStack[qHead++];
         matchGroup[matchCount++] = curr;
         
-        int r = curr >> 8;
-        int c = curr & 0xFF;
+        int r = GameConstants::unpackRow(curr);
+        int c = GameConstants::unpackCol(curr);
         
         for (int i = 0; i < HEX_NEIGHBORS_COUNT; i++) {
             int parity = (r + gridParityOffset) & 1;
@@ -316,7 +328,7 @@ void Model::checkMatches(int col, int row)
                 int nIdx = nr * MAX_COLS + nc;
                 if (!visited[nIdx] && grid[getPhysicalIndex(nr, nc)] == targetColor) {
                     visited[nIdx] = true;
-                    algoQueueStack[qTail++] = (nr << 8) | nc;
+                    algoQueueStack[qTail++] = GameConstants::packHex(nr, nc);
                 }
             }
         }
@@ -337,7 +349,7 @@ void Model::checkMatches(int col, int row)
         
         for (int i = 0; i < matchCount; i++) {
             int curr = matchGroup[i];
-            grid[getPhysicalIndex(curr >> 8, curr & 0xFF)] = GameConstants::EMPTY_COLOR;
+            grid[getPhysicalIndex(GameConstants::unpackRow(curr), GameConstants::unpackCol(curr))] = GameConstants::EMPTY_COLOR;
             cachedEggCount--;
         }
         
@@ -355,15 +367,15 @@ void Model::dropFloatingEggs()
     
     for (int c = 0; c < MAX_COLS; c++) {
         if (grid[getPhysicalIndex(0, c)] != EMPTY_COLOR) {
-            algoQueueStack[top++] = (0 << 8) | c;
+            algoQueueStack[top++] = GameConstants::packHex(0, c);
             connected[0 * MAX_COLS + c] = true;
         }
     }
     
     while (top > 0) {
         int curr = algoQueueStack[--top];
-        int r = curr >> 8;
-        int c = curr & 0xFF;
+        int r = GameConstants::unpackRow(curr);
+        int c = GameConstants::unpackCol(curr);
         
         for (int i = 0; i < HEX_NEIGHBORS_COUNT; i++) {
             int parity = (r + gridParityOffset) & 1;
@@ -374,7 +386,7 @@ void Model::dropFloatingEggs()
                 int nIdx = nr * MAX_COLS + nc;
                 if (!connected[nIdx] && grid[getPhysicalIndex(nr, nc)] != EMPTY_COLOR) {
                     connected[nIdx] = true;
-                    algoQueueStack[top++] = (nr << 8) | nc;
+                    algoQueueStack[top++] = GameConstants::packHex(nr, nc);
                 }
             }
         }
@@ -414,8 +426,8 @@ float Model::calculateDistanceSq(float x1, float y1, float x2, float y2) const
 
 void Model::getApproxCell(float x, float y, int &col, int &row) const
 {
-    row = (int)roundf((y - GameConstants::GRID_START_Y - globalOffsetY) / GameConstants::CELL_HEIGHT);
-    col = (int)roundf((x - GameConstants::GRID_START_X) / GameConstants::CELL_WIDTH);
+    row = (int)roundf((y - GameConstants::GRID_START_Y - globalOffsetY) * GameConstants::INV_CELL_HEIGHT);
+    col = (int)roundf((x - GameConstants::GRID_START_X) * (1.0f / GameConstants::CELL_WIDTH));
 }
 
 bool Model::isValidCell(int row, int col) const
@@ -483,7 +495,7 @@ void Model::shiftGridDown() {
             AudioManager::stopBGM();
             AudioManager::playSFX(audio_sfx_gameover, audio_sfx_gameover_length);
             gameState = STATE_GAME_OVER;
-            if (modelListener) modelListener->notifyGameOver();
+            if (modelListener != 0) { modelListener->notifyGameOver(); }
             return;
         }
     }
@@ -518,6 +530,49 @@ void Model::getGridData(uint8_t* out) const {
             out[r * GameConstants::MAX_COLS + c] = grid[getPhysicalIndex(r, c)];
         }
     }
+}
+
+void Model::calculateTrajectory(float startX, float startY, float dx, float dy, TrajectoryPoint* outPath, int& outCount, int maxSteps)
+{
+    float length = sqrtf(dx*dx + dy*dy);
+    if (length == 0.0f) {
+        outCount = 0;
+        return;
+    }
+    
+    float simVx = (dx / length) * GameConstants::BULLET_SPEED;
+    float simVy = (dy / length) * GameConstants::BULLET_SPEED;
+    float simX = startX;
+    float simY = startY;
+    
+    int dotIndex = 0;
+    float distTraveled = 0.0f;
+    
+    while (maxSteps-- > 0) {
+        simX += simVx;
+        simY += simVy;
+        distTraveled += GameConstants::BULLET_SPEED;
+        
+        if (simX <= GameConstants::LEFT_WALL && simVx < 0) {
+            simX = GameConstants::LEFT_WALL + (GameConstants::LEFT_WALL - simX);
+            simVx = -simVx;
+        } else if (simX >= GameConstants::RIGHT_WALL && simVx > 0) {
+            simX = GameConstants::RIGHT_WALL - (simX - GameConstants::RIGHT_WALL);
+            simVx = -simVx;
+        }
+        
+        if (isCollisionAt(simX, simY)) {
+            break;
+        }
+        
+        float nextDotDist = GameConstants::TRAJECTORY_DOT_START_DIST + dotIndex * GameConstants::TRAJECTORY_DOT_SPACING;
+        if (distTraveled >= nextDotDist && dotIndex < GameConstants::TRAJECTORY_DOTS_COUNT) {
+            outPath[dotIndex].x = simX;
+            outPath[dotIndex].y = simY;
+            dotIndex++;
+        }
+    }
+    outCount = dotIndex;
 }
 
 void Model::swapColor()

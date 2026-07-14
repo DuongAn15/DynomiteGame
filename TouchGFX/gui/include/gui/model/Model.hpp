@@ -21,6 +21,11 @@ enum DinoState {
     DINO_DONE
 };
 
+struct TrajectoryPoint {
+    float x;
+    float y;
+};
+
 class ModelListener;
 
 class Model
@@ -73,6 +78,7 @@ public:
     float getGlobalOffsetY() const { return globalOffsetY; }
     int getGridParityOffset() const { return gridParityOffset; }
     void getGridData(uint8_t* out) const;
+    void calculateTrajectory(float startX, float startY, float dx, float dy, TrajectoryPoint* outPath, int& outCount, int maxSteps);
     
     // Predictive Raycasting
     bool isCollisionAt(float x, float y) const;
@@ -110,6 +116,7 @@ private:
     int dropTimer;
     int clearingTimer;
     int totalTicks;
+    uint32_t systemTicks;
     float globalOffsetY;
     
     // Row spawn timer (frame counting)

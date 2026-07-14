@@ -1,5 +1,6 @@
 #include <gui/gameplayscreen_screen/GameplayScreenView.hpp>
 #include <gui/gameplayscreen_screen/GameplayScreenPresenter.hpp>
+#include <gui/common/FrontendApplication.hpp>
 
 GameplayScreenPresenter::GameplayScreenPresenter(GameplayScreenView& v)
     : view(v)
@@ -103,12 +104,14 @@ void GameplayScreenPresenter::getGridData(uint8_t* out) const
     model->getGridData(out);
 }
 
+void GameplayScreenPresenter::getTrajectory(float startX, float startY, float dx, float dy, TrajectoryPoint* outPath, int& outCount, int maxSteps)
+{
+    model->calculateTrajectory(startX, startY, dx, dy, outPath, outCount, maxSteps);
+}
+
 void GameplayScreenPresenter::notifyGameOver()
 {
-    // Báo cho UI chuyển sang màn hình GameOver (nếu có)
-    // Hiện tại có thể chưa có màn hình GameOverScreen, ta cứ báo cho View xử lý
-    // hoặc tạm thời bỏ qua nếu View chưa implement chuyển màn
-    // (View sẽ tự đọc gameState và hiện text GameOver)
+    static_cast<FrontendApplication*>(Application::getInstance())->gotoEndScreenScreenNoTransition();
 }
 
 void GameplayScreenPresenter::notifyScoreUpdated(int newScore)

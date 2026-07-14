@@ -44,6 +44,8 @@ private:
     bool isAiming;
     bool prevSwap;
     bool prevShoot;
+    bool isGridDirty;
+    bool isAimDirty;
 
     uint16_t getColorBitmap(int color);
 

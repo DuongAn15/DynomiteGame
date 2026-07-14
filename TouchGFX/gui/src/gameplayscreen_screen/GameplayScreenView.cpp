@@ -21,6 +21,8 @@ GameplayScreenView::GameplayScreenView()
     smoothedAimY = BULLET_START_Y;
     prevSwap = false;
     prevShoot = false;
+    isGridDirty = true;
+    isAimDirty = true;
 }
 
 void GameplayScreenView::setupScreen()
@@ -81,6 +83,7 @@ void GameplayScreenView::updateScore(int newScore)
     touchgfx::Unicode::snprintf(txtScoreBuffer, 10, "%d", newScore);
     txtScore.setWildcard(txtScoreBuffer);
     txtScore.invalidate();
+    isGridDirty = true;
 }
 
 void GameplayScreenView::updateFullGridUI()
@@ -88,6 +91,7 @@ void GameplayScreenView::updateFullGridUI()
     // Bắt buộc invalidate toàn bộ để xóa shadow rác
     std::memset(shadowGrid, SHADOW_GRID_INIT_VAL, sizeof(shadowGrid));
     eggGrid.invalidate();
+    isGridDirty = true;
 }
 
 uint16_t GameplayScreenView::getColorBitmap(int color)
@@ -121,6 +125,7 @@ void GameplayScreenView::handleClickEvent(const touchgfx::ClickEvent& evt)
                 return;
         }
         isAiming = true;
+        isAimDirty = true;
         aimX = evt.getX();
         aimY = evt.getY();
         smoothedAimX = aimX;
@@ -142,6 +147,7 @@ void GameplayScreenView::handleDragEvent(const touchgfx::DragEvent& evt)
     if (isAiming) {
         aimX = evt.getNewX();
         aimY = evt.getNewY();
+        isAimDirty = true;
     }
     presenter->handleTouchAim(evt.getNewX(), evt.getNewY());
 }
@@ -149,11 +155,6 @@ void GameplayScreenView::handleDragEvent(const touchgfx::DragEvent& evt)
 void GameplayScreenView::handleTickEvent()
 {
     GameplayScreenViewBase::handleTickEvent();
-
-    if (presenter->getGameState() == STATE_GAME_OVER) {
-        application().gotoEndScreenScreenNoTransition();
-        return;
-    }
 
     presenter->tick();
 
@@ -202,53 +203,35 @@ void GameplayScreenView::handleTickEvent()
     // --- Update trajectory ---
     if (isAiming) {
         // Áp dụng Low-Pass Filter để nội suy góc ngắm, loại bỏ hoàn toàn độ nhiễu của Touch (chống Jittering)
+        float oldSmX = smoothedAimX;
+        float oldSmY = smoothedAimY;
         smoothedAimX += (aimX - smoothedAimX) * AIM_SMOOTH_FACTOR;
         smoothedAimY += (aimY - smoothedAimY) * AIM_SMOOTH_FACTOR;
         
-        float dx = smoothedAimX - BULLET_START_X;
-        float dy = smoothedAimY - BULLET_START_Y;
-        if (dy > AIM_MIN_DY) dy = AIM_MIN_DY;
-        float length = sqrtf(dx*dx + dy*dy);
+        if (fabs(smoothedAimX - oldSmX) > 0.05f || fabs(smoothedAimY - oldSmY) > 0.05f) {
+            isAimDirty = true;
+        }
         
-        // Reset toàn bộ chấm ảo về trạng thái ẩn
-        hideTrajectory();
-        
-        // Predictive Raycasting
-        float simVx = (dx / length) * BULLET_SPEED;
-        float simVy = (dy / length) * BULLET_SPEED;
-        float simX = BULLET_START_X;
-        float simY = BULLET_START_Y;
-        
-        int dotIndex = 0;
-        float distTraveled = 0.0f;
-        int maxSteps = TRAJECTORY_MAX_STEPS; // Tránh lặp vô hạn
-        
-        while (maxSteps-- > 0) {
-            simX += simVx;
-            simY += simVy;
-            distTraveled += BULLET_SPEED;
+        if (isAimDirty) {
+            float dx = smoothedAimX - BULLET_START_X;
+            float dy = smoothedAimY - BULLET_START_Y;
+            if (dy > AIM_MIN_DY) dy = AIM_MIN_DY;
+            float length = sqrtf(dx*dx + dy*dy);
             
-            // Phản xạ bật tường (chỉnh tâm dội chạm mép theo chuẩn) và chặn dính tường
-            if (simX <= LEFT_WALL && simVx < 0) {
-                simX = LEFT_WALL + (LEFT_WALL - simX);
-                simVx = -simVx;
-            } else if (simX >= RIGHT_WALL && simVx > 0) {
-                simX = RIGHT_WALL - (simX - RIGHT_WALL);
-                simVx = -simVx;
-            }
+            // Reset toàn bộ chấm ảo về trạng thái ẩn
+            hideTrajectory();
             
-            // Dự đoán va chạm: Gọi hàm phi trạng thái từ Model
-            if (presenter->isCollisionAt(simX, simY)) {
-                break; // Dừng rải nét đứt ngay trước điểm va chạm!
-            }
+            // Predictive Raycasting via Model
+            TrajectoryPoint path[MAX_TRAJECTORY_STEPS];
+            int count = 0;
+            presenter->getTrajectory(BULLET_START_X, BULLET_START_Y, dx, dy, path, count, MAX_TRAJECTORY_STEPS);
             
-            float nextDotDist = TRAJECTORY_DOT_START_DIST + dotIndex * TRAJECTORY_DOT_SPACING;
-            if (distTraveled >= nextDotDist && dotIndex < TRAJECTORY_DOTS_COUNT) {
-                trajectoryDots[dotIndex].setPosition((int)simX - TRAJECTORY_DOT_OFFSET, (int)simY - TRAJECTORY_DOT_OFFSET, TRAJECTORY_DOT_SIZE, TRAJECTORY_DOT_SIZE);
-                trajectoryDots[dotIndex].setVisible(true);
-                trajectoryDots[dotIndex].invalidate();
-                dotIndex++;
+            for (int i = 0; i < count; i++) {
+                trajectoryDots[i].setPosition((int)path[i].x - TRAJECTORY_DOT_OFFSET, (int)path[i].y - TRAJECTORY_DOT_OFFSET, TRAJECTORY_DOT_SIZE, TRAJECTORY_DOT_SIZE);
+                trajectoryDots[i].setVisible(true);
+                trajectoryDots[i].invalidate();
             }
+            isAimDirty = false;
         }
     } else {
         hideTrajectory();
@@ -256,6 +239,9 @@ void GameplayScreenView::handleTickEvent()
 
     // --- Update bullet egg ---
     bool bulletVis = presenter->isBulletVisible();
+    if (bulletEgg.isVisible() && !bulletVis) {
+        isGridDirty = true;
+    }
     float bx, by;
     
     if (bulletVis)
@@ -270,8 +256,8 @@ void GameplayScreenView::handleTickEvent()
         by = BULLET_START_Y;
     }
 
-    int16_t newBulletX = (int16_t)(bx - (EGG_WIDTH / 2.0f));
-    int16_t newBulletY = (int16_t)(by - (EGG_HEIGHT / 2.0f));
+    int16_t newBulletX = (int16_t)(bx - (EGG_WIDTH * 0.5f));
+    int16_t newBulletY = (int16_t)(by - (EGG_HEIGHT * 0.5f));
 
     int color = presenter->getCurrentColor();
     
@@ -291,8 +277,8 @@ void GameplayScreenView::handleTickEvent()
         bulletEgg.setWidth((int16_t)EGG_WIDTH);
         bulletEgg.setHeight((int16_t)EGG_HEIGHT);
         bulletEgg.setBitmapPosition(0.0f, 0.0f);
-        bulletEgg.setOrigo(EGG_WIDTH / 2.0f, EGG_HEIGHT / 2.0f, CAMERA_DISTANCE_Z);
-        bulletEgg.setCamera(EGG_WIDTH / 2.0f, EGG_HEIGHT / 2.0f);
+        bulletEgg.setOrigo(EGG_WIDTH * 0.5f, EGG_HEIGHT * 0.5f, CAMERA_DISTANCE_Z);
+        bulletEgg.setCamera(EGG_WIDTH * 0.5f, EGG_HEIGHT * 0.5f);
         
         bulletEgg.setXY(newBulletX, newBulletY);
         bulletEgg.setVisible(true);
@@ -362,11 +348,15 @@ void GameplayScreenView::handleTickEvent()
 
 void GameplayScreenView::updateGrid()
 {
-    int newGridY = 22 - (int)GameConstants::CELL_HEIGHT + (int)presenter->getGlobalOffsetY();
+    int newGridY = GRID_UI_OFFSET_Y - (int)GameConstants::CELL_HEIGHT + (int)presenter->getGlobalOffsetY();
     if (eggGrid.getY() != newGridY) {
         eggGrid.setY(newGridY);
         eggGrid.invalidate();
+        isGridDirty = true;
     }
+    
+    if (!isGridDirty) return;
+    isGridDirty = false;
 
     uint8_t localBuffer[GameConstants::MAX_ROWS * GameConstants::MAX_COLS];
     presenter->getGridData(localBuffer);
